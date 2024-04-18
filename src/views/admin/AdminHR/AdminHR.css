@@ -1,0 +1,38 @@
+.management-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Styles for the cards */
+.card {
+  width: 700px;
+  padding: 30px;
+  margin: 20px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.card p {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Styles for course management card */
+.course-management {
+  background-color: #ffbb33;
+}
+
+/* Styles for teacher management card */
+.teacher-management {
+  background-color: #33ccff;
+}

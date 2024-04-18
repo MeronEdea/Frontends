@@ -1,0 +1,86 @@
+.registration-container {
+    display: flex;
+  
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    margin-left: 150px;
+    padding: 20px;
+  }
+  
+  .registration-box {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px;
+    width: 35%;
+    
+  }
+  
+  .registration-title {
+    color: #3b82f6;
+    font-size: 2rem;
+  
+
+  }
+  
+  .registration-subtitle {
+    color: #3b82f6;
+    font-size: 1.5rem;
+ 
+  }
+  
+  .registration-label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .registration-input {
+    width: 100%;
+    padding: 0.1rem;
+    border-radius: 0.25rem;
+    border: 2px solid #4299e1;
+  }
+  
+  .registration-button {
+    background-color: #4299e1;
+    color: white;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .registration-login-link {
+    color: #4299e1;
+    margin-bottom: 1rem;
+  }
+  
+  .login-link {
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+  
+  .moving-image {
+    position: absolute;
+    margin-right:100px ;
+    top: 50%;
+    right: 20px; /* adjust the position as needed */
+    transform: translateY(-50%);
+    height: 500px; /* adjust the size as needed */
+    width: 35%; /* or set a specific width */
+    animation: moveUpDown 2s infinite alternate; /* adjust animation duration as needed */
+  }
+  
+  @keyframes moveUpDown {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(-60%);
+    }
+  }
