@@ -7,12 +7,14 @@ function LandingPage() {
   const handleClick = () => {
     history.push(`/signup`);
   };
+  const handleClickLogin = () => {
+    history.push(`/signin`);
+  };
   return (
     <div className="App">
       <header>
         <div className="top-bar">
-          <button className="button">Sign In</button>
-          <button className="button">Register</button>
+          <button className="button"  onClick={handleClickLogin} >Sign In</button>
         </div>
       </header>
       <main>

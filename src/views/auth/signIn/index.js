@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './RegistrationForm.css'; // Import CSS file for additional styling
 import movingImage from './movingImage.webp'; // Import the image
+import { useHistory } from "react-router-dom";
 
 const RegistrationForm = () => {
   const handleLoginNavigation = () => {
-    window.location.href = '/LoginForm.js';
-  };
+    history.push(`/signin`);
+    };
+  const history = useHistory();
 
   const [fullname, setFullname] = useState('');
   const [id, setId] = useState('');
@@ -73,6 +75,9 @@ const RegistrationForm = () => {
 
   const handleConfirmPasswordChange = (e) => {
     setConfirmPassword(e.target.value);
+  };
+  const handleClickRegister = () => {
+    history.push(`/admin`);
   };
 
   const handleSubmit = (e) => {
@@ -213,7 +218,8 @@ const RegistrationForm = () => {
             </div>
           )}
           {showCamera && (
-            <button type="submit" className="registration-button">
+            <button type="submit" className="registration-button" onClick={handleClickRegister}
+            >
               Register
             </button>
           )}
