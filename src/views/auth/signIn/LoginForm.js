@@ -1,22 +1,25 @@
 import React, { useState, useRef } from 'react';
 import './LoginForm.css'; // Import external CSS file for styling
 import loginImage from './LoginImage.png'; // Import the login image
+import { useHistory } from "react-router-dom";
 
 
 const LoginForm = () => {
   const [loginMethod, setLoginMethod] = useState('');
   const [loginId, setLoginId] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const history = useHistory();
 
   const videoRef = useRef(null);
-  const handleLoginNavigation = () => {
-    window.location.href = '/ForgotPasswordProcess.js';
-  };
+  const handleforgotpassword = () => {
+    history.push(`/forgotpwd`);  };
 
   const handleLoginMethodChange = (e) => {
     setLoginMethod(e.target.value);
   };
-
+  const handleClickLogin = () => {
+    history.push(`/admin`);
+  };
   const handleLoginIdChange = (e) => {
     setLoginId(e.target.value);
   };
@@ -122,7 +125,7 @@ const LoginForm = () => {
             {' '}
             <span
               className="login-link"
-              onClick={handleLoginNavigation}
+              onClick={handleforgotpassword}
             >
              Forgot Password?
             </span>
@@ -132,7 +135,8 @@ const LoginForm = () => {
           )}
           <button
             type="submit"
-            className="login-button">
+            className="login-button"             onClick={handleClickLogin}
+            >
             Login
           </button>
         </form>

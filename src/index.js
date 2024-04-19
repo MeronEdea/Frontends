@@ -22,6 +22,8 @@ import ViewPermission from "./views/teacher/StudentPemission/ViewPermission";
 import CourseManagement from './views/admin/AdminHR/CourseManagement';
 import LandingPage from "./views/LandingPage/LandingPage";
 import Register from "./views/auth/signIn/index";
+import Login from "./views/auth/signIn/LoginForm";
+import ForgotPwd from "./views/auth/signIn/ForgotPasswordProcess";
 
 ReactDOM.render(
 	<ChakraProvider theme={theme}>
@@ -43,6 +45,9 @@ ReactDOM.render(
 						<Route path="/add-schedule" component={AddSchedule} />
 						<Route path="/edit-schedule/:id" component={EditSchedule} />
 						<Route path="/signup" component={Register} />
+						<Route path="/signin" component={Login} />
+						<Route path="/forgotpwd" component={ForgotPwd} />
+
 						<Redirect from='/' to='/admin' />
 					</Switch>
 				</HashRouter>
