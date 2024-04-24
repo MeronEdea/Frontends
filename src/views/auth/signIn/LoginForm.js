@@ -1,7 +1,6 @@
-import React, { useState, useRef } from "react";
-import "./LoginForm.css"; // Import external CSS file for styling
-// import loginImage from "./LoginImage.png"; // Import the login image
-import loginImage from "./../../../assets/img/auth/login1.jpg"
+import React, { useState } from "react";
+// import "./LoginForm.css"; // Import external CSS file for styling
+import loginImage from "./../../../assets/img/auth/class.jpg";
 import { useHistory } from "react-router-dom";
 
 const LoginForm = () => {
@@ -10,17 +9,20 @@ const LoginForm = () => {
   const [loginIdError, setLoginIdError] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginPasswordError, setLoginPasswordError] = useState("");
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
   const history = useHistory();
-  const [loginIdClicked, setLoginIdClicked] = useState(false);
-  const [loginLabelClicked, setLoginLabelClicked] = useState(false);
-  const videoRef = useRef(null);
+
   const handleforgotpassword = () => {
     history.push(`/forgotpwd`);
   };
 
+  const handlesignupNavigation = () => {
+    history.push(`/signup`);
+  };
+
   const handleLoginMethodChange = (e) => {
     setLoginMethod(e.target.value);
-    setLoginLabelClicked(true);
   };
 
   const handleLoginIdChange = (e) => {
@@ -29,23 +31,6 @@ const LoginForm = () => {
 
   const handleLoginPasswordChange = (e) => {
     setLoginPassword(e.target.value);
-  };
-
-  const handleFaceScan = async () => {
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.error("getUserMedia is not supported in this browser.");
-        return;
-      }
-
-      const constraints = { video: true };
-      const mediaStream = await navigator.mediaDevices.getUserMedia(
-        constraints
-      );
-      videoRef.current.srcObject = mediaStream;
-    } catch (error) {
-      console.error("Error accessing the camera:", error);
-    }
   };
 
   const validateLoginForm = () => {
@@ -60,7 +45,9 @@ const LoginForm = () => {
         setLoginIdError("");
       }
     }
-
+    const handleInputFocus = () => {
+      setIsInputFocused(true);
+    };
     // Validate Password
     if (loginMethod === "idPassword") {
       if (loginPassword.trim() === "") {
@@ -73,7 +60,9 @@ const LoginForm = () => {
 
     return isValid;
   };
-
+  const handleInputBlur = () => {
+    setIsInputFocused(false);
+  };
   const handleLoginSubmit = (e) => {
     e.preventDefault();
 
@@ -102,104 +91,73 @@ const LoginForm = () => {
   };
 
   return (
-    <div>
-      <img
-        className="moving-login-image"
-        src={loginImage} // Use the imported image
-        alt="Login Image"
-      />
-      <div className="login-container">
-        <div className="login-box">
-          <form onSubmit={handleLoginSubmit} className="login-form">
-            <h1 className="login-title">Login</h1>
-            {!loginLabelClicked && (
-              <div className="login-method">
+    <div
+      className="flex min-h-screen w-full items-center justify-center bg-gray-900 bg-cover bg-no-repeat"
+      style={{ backgroundImage: `url(${loginImage})` }}
+    >
+      <div className="flex flex-col justify-between h-full py-8">
+        <div
+          className="rounded-xl bg-gray-600 bg-opacity-50 px-16 w-96 py-10 shadow-lg backdrop-blur-md max-sm:px-8"
+          style={{ width: "500px" }}
+        >
+          <div className="text-white">
+            <div className="mb-8 flex flex-col items-center">
+              <img
+                src="https://www.logo.wine/a/logo/Instagram/Instagram-Glyph-Color-Logo.wine.svg"
+                width="150"
+                alt=""
+                srcSet=""
+              />
+              <h1 className="mb-2 text-blue-500 text-2xl font-bold">Login</h1>
+              <span className="text-gray-300">Enter Login Details</span>
+            </div>
+            <form action="#">
+              <div className="mb-4 text-lg">
                 <input
-                  type="radio"
-                  id="faceScan"
-                  name="loginMethod"
-                  value="faceScan"
-                  checked={loginMethod === "faceScan"}
-                  onChange={handleLoginMethodChange}
+                  className={`rounded-2xl border border-32 border-white bg-blue-100  bg-opacity-100 focus:border-blue focus:ring-1 focus:ring-blue-500 ${
+                    isInputFocused ? "focus:bg-white text-black" : ""
+                  } w-full px-6 py-2 text-left text-inherit text-black placeholder-slate-400 shadow-lg outline-none backdrop-blur-md`}
+                  type="text"
+                  name="name"
+                  style={{ color: isInputFocused ? "#000" : "inherit" }} // Set text color to black when input is focused
+                  placeholder="Enter ID number"
+                  onFocus={() => setIsInputFocused(true)} // Set isInputFocused to true when input is focused
+                  onBlur={() => setIsInputFocused(false)} // Set isInputFocused to false when input is blurred
                 />
-
-                <label htmlFor="faceScan" className="hover:text-blue-500">Login with Face Scanning</label>
               </div>
-            )}
 
-            {loginMethod !== "faceScan" && !loginLabelClicked && (
-              <div className="login-method">
+              <div className="mb-4 text-lg">
                 <input
-                  type="radio"
-                  id="idPassword"
-                  name="loginMethod"
-                  value="idPassword"
-                  checked={loginMethod === "idPassword"}
-                  onChange={handleLoginMethodChange}
+                  className={`rounded-2xl border border-32 border-white bg-blue-100  bg-opacity-100 focus:border-blue focus:ring-1 focus:ring-blue-500 ${
+                    isInputFocused ? "focus:bg-white text-black" : ""
+                  } w-full px-6 py-2 text-left text-inherit  placeholder-slate-400 shadow-lg outline-none backdrop-blur-md`}
+                  type="password"
+                  name="name"
+                  placeholder="*********"
+                  style={{ color: isInputFocused ? "#000" : "inherit" }} // Set text color to black when input is focused
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
                 />
-                <label htmlFor="idPassword" className="hover:text-blue-500">
-                  Login with ID & Password
-                </label>
               </div>
-            )}
-            {loginMethod === "faceScan" && (
-              <>
-                <video ref={videoRef} className="face-scan-video" autoPlay />
+              <div className="mt-8 flex justify-center text-lg text-black">
                 <button
-                  type="button"
-                  onClick={handleFaceScan}
-                  className="scan-face-button"
+                  type="submit"
+                  className="rounded-4xl bg-blue-200 bg-opacity-50  py-2 text-white shadow-xl backdrop-blur-md transition-colors duration-300 hover:bg-blue-300"
+                  onClick={handleLoginSubmit}
                 >
-                  Scan Face
+                  Login
                 </button>
-              </>
-            )}
-            {loginMethod === "idPassword" && (
-              <>
-                <label className="text-blue-500">
-                  ID:
-                  <input
-                    type="text"
-                    value={loginId}
-                    onChange={handleLoginIdChange}
-                    onFocus={() => setLoginIdClicked(true)}
-                    onBlur={() => setLoginIdClicked(false)}
-                    className={`border ${
-                      loginIdClicked ? "border-blue-500" : "border-gray-300"
-                    } focus:outline-none focus:border-blue-500 px-3 py-2 rounded-md text-blue-500`}
-                  />
-                  {loginIdError && (
-                    <p className="text-red-500 text-xs">{loginIdError}</p>
-                  )}
-                </label>
-
-                <label className={"text-blue-500"}>
-                  Password:
-                  <input
-                    type="password"
-                    value={loginPassword}
-                    onChange={handleLoginPasswordChange}
-                  />
-                  {loginPasswordError && (
-                    <p className="error-message">{loginPasswordError}</p>
-                  )}
-                </label>
-                <p className="registration-login-link">
-                  {" "}
-                  <span className="login-link" onClick={handleforgotpassword}>
-                    Forgot Password?
-                  </span>
-                </p>
-              </>
-            )}
-            <button
-              type="submit"
-              className="login-button"
-              onClick={handleLoginSubmit}
-            >
-              Login
-            </button>
-          </form>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div>
+          <p className="text-center text-blue-500">
+            Don't have an account?{" "}
+            <span className="login-link" onClick={handlesignupNavigation}>
+              SignUp here
+            </span>
+          </p>
         </div>
       </div>
     </div>

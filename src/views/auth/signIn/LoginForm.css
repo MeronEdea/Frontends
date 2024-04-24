@@ -27,7 +27,15 @@
       transform: translateY(-60%);
     }
   }
-  
+  /* LoginForm.css */
+
+/* Style placeholder to span the entire width of the input field */
+.input-placeholder {
+  width: 20%;
+}
+
+/* Adjust other styles as needed */
+
   .login-box {
     width: 60%;
     margin: 50px; /* Adjust as needed */
@@ -78,23 +86,7 @@
   border-color: #4299e1;
   outline: none; /* Remove default focus outline */
 }
-  .login-button {
-    background-color: #4299e1;
-    color: white;
-    font-size: 1rem;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 20%;
-    margin: 20px;
-  }
   
-  .login-button:hover {
-    background-color: #4f86bb;
-   
-  }
   
   .face-scan-video {
     width: 80%;
