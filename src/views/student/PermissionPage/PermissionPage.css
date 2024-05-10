@@ -42,18 +42,18 @@
   width: auto;
 }
 
-button[type="submit"] {
+/* button[type="submit"] {
   display: block;
-  width: 100%;
+  /* width: 100%; 
   padding: 10px;
-  background-color: skyblue;
+  /* background-color: skyblue; 
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-}
+} */
 
 button[type="submit"]:hover {
-  background-color: #0056b3;
+  /* background-color: #0056b3; */
 }
