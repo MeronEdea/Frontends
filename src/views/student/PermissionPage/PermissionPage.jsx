@@ -1,52 +1,53 @@
-import React, { useState } from 'react';
-import './PermissionPage.css'; // Import the CSS file
+import React, { useState } from "react";
+import "./PermissionPage.css"; // Import the CSS file
 
 function PermissionPage() {
   // Sample list of teachers
-  const teachers = ['Teacher 1', 'Teacher 2', 'Teacher 3'];
+  const teachers = ["Teacher 1", "Teacher 2", "Teacher 3"];
 
   // State variables to store form data and validation status
-  const [teacher, setTeacher] = useState('');
-  const [reason, setReason] = useState('');
+  const [teacher, setTeacher] = useState("");
+  const [reason, setReason] = useState("");
   const [evidence, setEvidence] = useState(null); // Change to null initially
   const [sickLeave, setSickLeave] = useState(false);
-  const [teacherError, setTeacherError] = useState('');
-  const [reasonError, setReasonError] = useState('');
-  const [fileSizeError, setFileSizeError] = useState('');
+  const [teacherError, setTeacherError] = useState("");
+  const [reasonError, setReasonError] = useState("");
+  const [fileSizeError, setFileSizeError] = useState("");
 
   // Function to handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
     // Perform form validation
     if (!teacher) {
-      setTeacherError('Please select a teacher.');
+      setTeacherError("Please select a teacher.");
       return;
     } else {
-      setTeacherError('');
+      setTeacherError("");
     }
     if (!reason) {
-      setReasonError('Please provide a reason.');
+      setReasonError("Please provide a reason.");
       return;
     } else {
-      setReasonError('');
+      setReasonError("");
     }
     if (!evidence) {
-      setFileSizeError('Please select an evidence file.');
+      setFileSizeError("Please select an evidence file.");
       return;
-    } else if (evidence.size > 5242880) { // 5MB size limit
-      setFileSizeError('File size exceeds the limit (5MB).');
+    } else if (evidence.size > 5242880) {
+      // 5MB size limit
+      setFileSizeError("File size exceeds the limit (5MB).");
       return;
     } else {
-      setFileSizeError('');
+      setFileSizeError("");
     }
     // Perform submission logic here (e.g., send data to server)
-    console.log('Teacher:', teacher);
-    console.log('Reason:', reason);
-    console.log('Evidence:', evidence);
-    console.log('Sick leave requested:', sickLeave);
+    console.log("Teacher:", teacher);
+    console.log("Reason:", reason);
+    console.log("Evidence:", evidence);
+    console.log("Sick leave requested:", sickLeave);
     // Reset form fields after submission
-    setTeacher('');
-    setReason('');
+    setTeacher("");
+    setReason("");
     setEvidence(null);
     setSickLeave(false);
   };
@@ -57,7 +58,7 @@ function PermissionPage() {
     setEvidence(file);
   };
 
-  return ( 
+  return (
     <div>
       <h2 className="title">Permission Form</h2>
       <div className="permission-form">
@@ -72,7 +73,9 @@ function PermissionPage() {
             >
               <option value="">Select Teacher</option>
               {teachers.map((teacher, index) => (
-                <option key={index} value={teacher}>{teacher}</option>
+                <option key={index} value={teacher}>
+                  {teacher}
+                </option>
               ))}
             </select>
             {teacherError && <p className="error-message">{teacherError}</p>}
@@ -107,7 +110,12 @@ function PermissionPage() {
             />
             <label htmlFor="sickLeave">Request Sick Leave</label>
           </div>
-          <button type="submit">Submit</button>
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-300 text-white font-bold py-2 px-2 rounded"
+          >
+            Submit
+          </button>
         </form>
       </div>
     </div>

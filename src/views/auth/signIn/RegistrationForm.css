@@ -1,4 +1,4 @@
-.registration-container {
+/* .registration-container {
     display: flex;
   
     align-items: center;
@@ -6,8 +6,42 @@
     position: relative;
     margin-left: 150px;
     padding: 20px;
+  } */
+  .-z-1 {
+    z-index: -1;
   }
-  
+
+  .origin-0 {
+    transform-origin: 0%;
+  }
+
+  input:focus ~ label,
+  input:not(:placeholder-shown) ~ label,
+  textarea:focus ~ label,
+  textarea:not(:placeholder-shown) ~ label,
+  select:focus ~ label,
+  select:not([value='']):valid ~ label {
+    /* @apply transform; scale-75; -translate-y-6; */
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-rotate: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate))
+      skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+    --tw-scale-x: 0.75;
+    --tw-scale-y: 0.75;
+    --tw-translate-y: -1.5rem;
+  }
+
+  input:focus ~ label,
+  select:focus ~ label {
+    /* @apply text-black; left-0; */
+    --tw-text-opacity: 1;
+    color: rgba(0, 0, 0, var(--tw-text-opacity));
+    left: 0px;
+  }
+  /*
   .registration-box {
     background-color: #ffffff;
     border-radius: 10px;
@@ -47,8 +81,8 @@
   .registration-input:focus {
     border-color: #4299e1;
     outline: none; /* Remove default focus outline */
-  }
-  
+  /* } */
+  /*
   .registration-button {
     background-color: #4299e1;
     color: white;
@@ -75,27 +109,27 @@
     position: absolute;
     margin-right:100px ;
     top: 50%;
-    right: 20px; /* adjust the position as needed */
+    right: 20px; 
     transform: translateY(-50%);
-    height: 500px; /* adjust the size as needed */
-    width: 35%; /* or set a specific width */
-    animation: moveUpDown 2s infinite alternate; /* adjust animation duration as needed */
+    height: 500px;
+    width: 35%; 
+    animation: moveUpDown 2s infinite alternate;
   }
   
   .error-message {
     color: red;
-    font-size: 0.65rem; /* or adjust as needed */
-    margin-top: -0.2rem; /* Adjust to position it on top of the text field */
+    font-size: 0.65rem;
+    margin-top: -0.2rem;
   }
   
   .registration-label {
-    position: relative; /* Required for absolute positioning of error message */
+    position: relative; 
   }
   
   .error {
-    border: 1px solid red; /* Add red border to indicate error */
-  }
-  
+    border: 1px solid red; 
+  }*/
+  /*
   @keyframes moveUpDown {
     0% {
       transform: translateY(-50%);
@@ -103,4 +137,4 @@
     100% {
       transform: translateY(-60%);
     }
-  }
+  } */
