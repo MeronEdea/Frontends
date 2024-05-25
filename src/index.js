@@ -8,7 +8,8 @@ import TeacherLayout from 'layouts/teacher';
 import { ChakraProvider } from '@chakra-ui/react';
 import theme from 'theme/theme';
 import { ThemeEditorProvider } from '@hypertheme-editor/chakra-ui';
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ViewCoursePage from "./views/teacher/courses/components/view";
 import {tableData} from "views/teacher/courses/variables/tableData";
 import {studentData} from "views/teacher/courses/variables/studentData";
@@ -24,6 +25,8 @@ import LandingPage from "./views/LandingPage/LandingPage";
 import Register from "./views/auth/signIn/index";
 import Login from "./views/auth/signIn/LoginForm";
 import ForgotPwd from "./views/auth/signIn/ForgotPasswordProcess";
+
+
 
 ReactDOM.render(
 	<ChakraProvider theme={theme}>
@@ -47,6 +50,7 @@ ReactDOM.render(
 						<Route path="/signup" component={Register} />
 						<Route path="/signin" component={Login} />
 						<Route path="/forgotpwd" component={ForgotPwd} />
+						{/* <ToastContainer /> */}
 
 						<Redirect from='/' to='/admin' />
 					</Switch>

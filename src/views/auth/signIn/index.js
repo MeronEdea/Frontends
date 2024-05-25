@@ -1,7 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import movingImage from "../../../assets/img/auth/class.jpg";
 import { useHistory } from "react-router-dom";
-import { FaUser, FaIdCard, FaEnvelope, FaPhone, FaLock } from "react-icons/fa";
+import {
+  FaUser,
+  FaIdCard,
+  FaEnvelope,
+  FaPhone,
+  FaLock,
+  FaTransgender,
+  FaBuilding,
+  FaUserGraduate,
+  FaCalendarAlt,
+} from "react-icons/fa";
 
 const RegistrationForm = () => {
   const history = useHistory();
@@ -20,6 +30,14 @@ const RegistrationForm = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showCamera, setShowCamera] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
+  const [gender, setGender] = useState(""); // New state for gender
+  const [genderError, setGenderError] = useState(""); // Error state for gender
+  const [department, setDepartment] = useState(""); // New state for department
+  const [departmentError, setDepartmentError] = useState(""); // Error state for department
+  const [section, setSection] = useState("");
+  const [sectionError, setSectionError] = useState("");
+  const [yearSemester, setYearSemester] = useState("");
+  const [yearSemesterError, setYearSemesterError] = useState("");
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -134,11 +152,51 @@ const RegistrationForm = () => {
     return true;
   };
 
+  const validateGender = () => {
+    if (gender.trim() === "") {
+      setGenderError("Gender is required");
+      return false;
+    }
+    setGenderError("");
+    return true;
+  };
+
+  const validateDepartment = () => {
+    if (department.trim() === "") {
+      setDepartmentError("Department is required");
+      return false;
+    }
+    setDepartmentError("");
+    return true;
+  };
+
+  const validateSection = () => {
+    if (section.trim() === "") {
+      setSectionError("Section is required");
+      return false;
+    }
+    setSectionError("");
+    return true;
+  };
+
+  const validateYearSemester = () => {
+    if (yearSemester.trim() === "") {
+      setYearSemesterError("Year and Semester is required");
+      return false;
+    }
+    setYearSemesterError("");
+    return true;
+  };
+
   const handleNext = () => {
     const isFullnameValid = validateFullname();
     const isIdValid = validateId();
     const isEmailValid = validateEmail();
     const isPhoneNumberValid = validatePhoneNumber();
+    const isGenderValid = validateGender();
+    const isDepartmentValid = validateDepartment();
+    const isSectionValid = validateSection();
+    const isYearSemesterValid = validateYearSemester();
     const isPasswordValid = validatePassword();
     const isConfirmPasswordValid = validateConfirmPassword();
 
@@ -147,6 +205,10 @@ const RegistrationForm = () => {
       isIdValid &&
       isEmailValid &&
       isPhoneNumberValid &&
+      isGenderValid &&
+      isDepartmentValid &&
+      isSectionValid &&
+      isYearSemesterValid &&
       isPasswordValid &&
       isConfirmPasswordValid
     ) {
@@ -184,6 +246,22 @@ const RegistrationForm = () => {
     setConfirmPassword(e.target.value);
   };
 
+  const handleGenderChange = (e) => {
+    setGender(e.target.value);
+  };
+
+  const handleDepartmentChange = (e) => {
+    setDepartment(e.target.value);
+  };
+
+  const handleSectionChange = (e) => {
+    setSection(e.target.value);
+  };
+
+  const handleYearSemesterChange = (e) => {
+    setYearSemester(e.target.value);
+  };
+
   const handlePictureChange = async () => {
     try {
       if (!videoRef.current || !videoRef.current.srcObject) {
@@ -204,8 +282,12 @@ const RegistrationForm = () => {
       console.error("Error capturing picture:", error);
     }
   };
+
   return (
-<div className="registration-container flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat" style={{ backgroundImage: `url(${movingImage})` }}>
+    <div
+      className="registration-container flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat"
+      style={{ backgroundImage: `url(${movingImage})` }}
+    >
       <div className="flex flex-col justify-between h-full py-8">
         <div className="rounded-xl bg-gray-600 bg-opacity-50 px-24 py-12 w-full h-full shadow-lg backdrop-blur-md max-sm:px-8">
           <div className="text-white">
@@ -217,6 +299,7 @@ const RegistrationForm = () => {
             </div>
             {!showCamera && (
               <form onSubmit={handleSubmit}>
+                {/* Full Name */}
                 <div className="flex flex-col">
                   <div className="relative">
                     <input
@@ -243,6 +326,7 @@ const RegistrationForm = () => {
                   </div>
                 </div>
 
+                {/* ID */}
                 <div className="flex flex-col">
                   <div className="relative">
                     <input
@@ -269,6 +353,7 @@ const RegistrationForm = () => {
                   {idError && <p className="text-red-500 text-sm">{idError}</p>}
                 </div>
 
+                {/* Email */}
                 <div className="flex flex-col">
                   <div className="relative">
                     <input
@@ -297,6 +382,7 @@ const RegistrationForm = () => {
                   )}
                 </div>
 
+                {/* Phone Number */}
                 <div className="flex flex-col">
                   <div className="relative">
                     <input
@@ -325,6 +411,7 @@ const RegistrationForm = () => {
                   )}
                 </div>
 
+                {/* Password */}
                 <div className="flex flex-col">
                   <div className="relative">
                     <input
@@ -353,6 +440,7 @@ const RegistrationForm = () => {
                   )}
                 </div>
 
+                {/* Confirm Password */}
                 <div className="flex flex-col">
                   <div className="relative">
                     <input
@@ -383,6 +471,118 @@ const RegistrationForm = () => {
                   )}
                 </div>
 
+                {/* Gender */}
+                <div className="flex flex-col">
+                  <div className="relative">
+                    <FaTransgender className="absolute top-0 left-0 mt-3 ml-2 text-gray-400" />
+                    <select
+                      id="gender"
+                      value={gender}
+                      onChange={handleGenderChange}
+                      onBlur={validateGender}
+                      className={`registration-input ${
+                        genderError ? "border-red-500" : ""
+                      } text-gray-400 pl-10 mb-4 block w-full px-0 mt-3 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200`}
+                    >
+                      <option value="" disabled>
+                        Select Gender
+                      </option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  {genderError && (
+                    <p className="text-red-500 text-sm">{genderError}</p>
+                  )}
+                </div>
+
+                {/* Department */}
+                <div className="flex flex-col">
+                  <div className="relative">
+                  <FaBuilding className="absolute top-0 left-0 mt-3 ml-2 mr-4  text-gray-400" />
+
+                    <select
+                      id="department"
+                      value={department}
+                      onChange={handleDepartmentChange}
+                      onBlur={validateDepartment}
+                      className={`registration-input ${
+                        departmentError ? "border-red-500" : ""
+                      } text-gray-400 pl-10 mb-4 block w-full px-0 mt-3 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200`}
+                    >
+                      <option value="" disabled>
+                        Select Department
+                      </option>
+                      <option value="department1">Department 1</option>
+                      <option value="department2">Department 2</option>
+                      {/* Add more options as needed */}
+                    </select>
+                  </div>
+                  {departmentError && (
+                    <p className="text-red-500 text-sm">{departmentError}</p>
+                  )}
+                </div>
+
+                {/* Section */}
+                <div className="flex flex-col">
+                  <div className="relative">
+                    <input
+                      id="section"
+                      type="text"
+                      placeholder=" "
+                      value={section}
+                      onChange={handleSectionChange}
+                      onBlur={validateSection}
+                      className={`registration-input ${
+                        sectionError ? "border-red-500" : ""
+                      } text-white pl-4 block w-full px-0 mt-3 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200`}
+                    />
+                    <label
+                      htmlFor="section"
+                      className={`absolute top-0 left-0 mt-2 ml-2 text-gray-400 ${
+                        section ? "hidden" : ""
+                      }`}
+                    >
+                      <FaUserGraduate className="inline-block mr-2 mb-1" />{" "}
+                      Enter your section
+                    </label>
+                  </div>
+                  {sectionError && (
+                    <p className="text-red-500 text-sm">{sectionError}</p>
+                  )}
+                </div>
+
+                {/* Year and Semester */}
+                <div className="flex flex-col">
+                  <div className="relative">
+                    <input
+                      id="yearSemester"
+                      type="text"
+                      placeholder=" "
+                      value={yearSemester}
+                      onChange={handleYearSemesterChange}
+                      onBlur={validateYearSemester}
+                      className={`registration-input ${
+                        yearSemesterError ? "border-red-500" : ""
+                      } text-white pl-4 block w-full px-0 mt-3 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200`}
+                    />
+                    <label
+                      htmlFor="yearSemester"
+                      className={`absolute top-0 left-0 mt-2 ml-2 text-gray-400 ${
+                        yearSemester ? "hidden" : ""
+                      }`}
+                    >
+                      <FaCalendarAlt className="inline-block mr-2 mb-1" /> Enter
+                      your year and semester
+                    </label>
+                  </div>
+                  {yearSemesterError && (
+                    <p className="text-red-500 text-sm">{yearSemesterError}</p>
+                  )}
+                </div>
+
+                {/* Next Button */}
                 <button
                   type="button"
                   onClick={handleNext}
