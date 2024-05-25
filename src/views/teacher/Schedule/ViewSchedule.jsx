@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom"; // Import useHistory hook for redirection
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
+import axios from "axios"; // Import Axios for making HTTP requests
 import {
   Box,
   Button,
@@ -19,27 +20,7 @@ import { enUS } from "date-fns/locale";
 import { Portal, useDisclosure } from "@chakra-ui/react";
 import routes from "../../../routes.js";
 import Navbar from "../../../components/navbar/NavbarAdmin.js";
-import { DeleteIcon } from "@chakra-ui/icons"; // Import the DeleteIcon component
-
-const sampleSchedule = [
-  {
-    time: "9:00 AM",
-    Monday: "Section C",
-    Tuesday: "Section A",
-    Wednesday: "Section C",
-    Thursday: "",
-    Friday: "Section D",
-  },
-  {
-    time: "10:00 AM",
-    Monday: "",
-    Tuesday: "Section D",
-    Wednesday: "",
-    Thursday: "Section B",
-    Friday: "Section C",
-  },
-  // Add more sample data as needed
-];
+import { DeleteIcon } from "@chakra-ui/icons";
 
 const ViewSchedule = () => {
   const locales = {
@@ -59,35 +40,61 @@ const ViewSchedule = () => {
   const [currentEvent, setCurrentEvent] = useState(null);
   const [eventInfoModal, setEventInfoModal] = useState(false);
   const [events, setEvents] = useState([]);
+  const [scheduleData, setScheduleData] = useState([]);
+  const [schedules, setSchedules] = useState([]); // Define setSchedules function here
 
-  const history = useHistory(); // Initialize useHistory
+  const history = useHistory();
 
-  // Generate random color with lighter opacity
+  useEffect(() => {
+    // Fetch schedule data
+    const fetchScheduleData = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/display_schedule/");
+        const data = response.data;
+        if (data && data.schedules) {
+          // Set the schedules state
+          setSchedules(data.schedules);
+          // Update the scheduleData state for rendering
+          const updatedScheduleData = data.schedules.map(schedule => ({
+            // Map the fetched schedule data to the format expected by your table
+            time: `${schedule.start_time} - ${schedule.end_time}`, // Assuming you want to display the time range
+            Monday: schedule.day_of_the_week === 'Monday' ? 'Available' : '', // Example for Monday, adjust as needed
+            // Add more days as needed
+          }));
+          setScheduleData(updatedScheduleData);
+        } else {
+          console.error("Invalid data format:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching schedule data:", error);
+      }
+    };
+  
+    fetchScheduleData();
+  }, []);
+  
+  
+
+  const handleAddEventClick = () => {
+    console.log("Add Event button clicked");
+    history.push("/add-schedule");
+  };
+
+  const today = new Date();
+  const dates = Array.from({ length: 5 }, (_, i) => addDays(today, i));
+  const formattedDates = dates.map((date) => format(date, "EEE, MMM dd"));
+
+  const handleScheduleItemClick = (event) => {
+    history.push(`/edit-schedule/${event.id}`);
+  };
+
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
     let color = "#";
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
-    return `${color}20`; // Adding 20% opacity (lighter)
-  };
-
-  // Function to handle add event button click
-  const handleAddEventClick = () => {
-    console.log("Add Event button clicked");
-    history.push("/add-schedule"); // Assuming "/add-schedule" is the route path for the AddSchedule page
-  };
-  
-
-  // Calculate dates
-  const today = new Date();
-  const dates = Array.from({ length: 5 }, (_, i) => addDays(today, i));
-  const formattedDates = dates.map((date) => format(date, "EEE, MMM dd"));
-
-  // Function to handle schedule item click
-  const handleScheduleItemClick = (event) => {
-    // Redirect to edit page with the event ID or other identifier
-    history.push(`/edit-schedule/${event.id}`); // Assuming "/edit-schedule" is the route path for editing schedule and each schedule item has a unique ID
+    return `${color}20`;
   };
 
   return (
@@ -123,24 +130,24 @@ const ViewSchedule = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {sampleSchedule.map((row, index) => (
+            {scheduleData.map((row, index) => (
               <Tr
                 key={index}
                 className="mb-2"
                 style={{
                   margin: "8px 0",
-                  cursor: "pointer", // Set cursor to pointer
-                  transition: "background-color 0.3s ease", // Smooth transition for background color change
-                  height: "80px", // Increase height
-                  borderRadius: "8px", // Add rounded borders
-                  overflow: "hidden", // Hide overflowing content
+                  cursor: "pointer",
+                  transition: "background-color 0.3s ease",
+                  height: "80px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
                 }}
-                onClick={() => handleScheduleItemClick(row)} // Pass the row data to the click handler
+                onClick={() => handleScheduleItemClick(row)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#F0F0F0"; // Change background color on hover
+                  e.currentTarget.style.backgroundColor = "#F0F0F0";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = ""; // Reset background color on mouse leave
+                  e.currentTarget.style.backgroundColor = "";
                 }}
               >
                 <Td>{row.time}</Td>
@@ -153,19 +160,19 @@ const ViewSchedule = () => {
                         backgroundColor: row[day]
                           ? getRandomColor()
                           : "#FFFFFF",
-                        position: "relative", // Add relative position for absolute positioning of DeleteIcon
+                        position: "relative",
                       }}
                     >
                       {row[day]}
-                      {row[day] && ( // Render DeleteIcon only if there is content
+                      {row[day] && (
                         <DeleteIcon
                           style={{
                             position: "absolute",
                             top: "4px",
                             right: "4px",
-                            color: "rgba(255, 0, 0, 0.5)", // Red color with 50% opacity
+                            color: "rgba(255, 0, 0, 0.5)",
                             cursor: "pointer",
-                            fontSize: "13px", // Decrease the size to make the icon smaller
+                            fontSize: "13px",
                           }}
                         />
                       )}
