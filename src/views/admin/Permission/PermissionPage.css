@@ -1,58 +1,45 @@
 .permission-page {
-    max-width: 800px;
-    margin-top: 150px ;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .role-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  .role-card {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    flex: 1 1 calc(33.33% - 20px);
-  }
-  
-  .role-card h2 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.5rem;
-    color: #333;
-  }
-  
-  .permissions {
-    margin-top: 20px;
-  }
-  
-  .permissions h4 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-    color: #555;
-  }
-  
-  .permissions ul {
-    padding: 0;
-  }
-  
-  .permissions ul li {
-    margin-bottom: 10px;
-  }
-  
-  .permissions label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-  }
-  
-  .permissions input[type="checkbox"] {
-    margin-right: 10px;
-  }
-  
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.permission-page h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.role-list table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+}
+
+.role-list th, .role-list td {
+  border: 1px solid #87bedf;
+  padding: 10px;
+}
+
+.role-list th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: left;
+}
+
+.role-list ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.role-list li {
+  margin-bottom: 5px;
+}
+
+.role-list label {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.role-list input[type="checkbox"] {
+  margin-right: 5px;
+}

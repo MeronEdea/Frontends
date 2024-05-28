@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import movingImage from "../../../assets/img/auth/class.jpg";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
 import {
   FaUser,
   FaIdCard,
@@ -22,6 +23,8 @@ const RegistrationForm = () => {
   const [idError, setIdError] = useState("");
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [college, setCollege] = useState("");
+  const [collegeError, setCollegeError] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [password, setPassword] = useState("");
@@ -30,15 +33,16 @@ const RegistrationForm = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showCamera, setShowCamera] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
-  const [gender, setGender] = useState(""); // New state for gender
-  const [genderError, setGenderError] = useState(""); // Error state for gender
-  const [department, setDepartment] = useState(""); // New state for department
-  const [departmentError, setDepartmentError] = useState(""); // Error state for department
+  const [gender, setGender] = useState("");
+  const [genderError, setGenderError] = useState("");
+  const [department, setDepartment] = useState("");
+  const [departmentError, setDepartmentError] = useState("");
   const [section, setSection] = useState("");
   const [sectionError, setSectionError] = useState("");
   const [yearSemester, setYearSemester] = useState("");
   const [yearSemesterError, setYearSemesterError] = useState("");
   const videoRef = useRef(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (showCamera) {
@@ -50,6 +54,10 @@ const RegistrationForm = () => {
       stopVideo();
     };
   }, [showCamera]);
+
+  useEffect(() => {
+    console.log("Picture state:", picture);
+  }, [picture]);
 
   const startVideo = async () => {
     try {
@@ -161,6 +169,15 @@ const RegistrationForm = () => {
     return true;
   };
 
+  const validateCollege = () => {
+    if (college.trim() === "") {
+      setCollegeError("College is required");
+      return false;
+    }
+    setCollegeError("");
+    return true;
+  };
+
   const validateDepartment = () => {
     if (department.trim() === "") {
       setDepartmentError("Department is required");
@@ -194,6 +211,7 @@ const RegistrationForm = () => {
     const isEmailValid = validateEmail();
     const isPhoneNumberValid = validatePhoneNumber();
     const isGenderValid = validateGender();
+    const isCollegeValid = validateCollege();
     const isDepartmentValid = validateDepartment();
     const isSectionValid = validateSection();
     const isYearSemesterValid = validateYearSemester();
@@ -206,6 +224,7 @@ const RegistrationForm = () => {
       isEmailValid &&
       isPhoneNumberValid &&
       isGenderValid &&
+      isCollegeValid &&
       isDepartmentValid &&
       isSectionValid &&
       isYearSemesterValid &&
@@ -216,10 +235,41 @@ const RegistrationForm = () => {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
+    console.log("Start of handleSubmit");
     event.preventDefault();
-    setShowCamera(false);
-    history.push(`/admin`);
+    console.log("in handle submit");
+  
+    try {
+      const formData = new FormData();
+      formData.append("fullname", fullname);
+      formData.append("student_id", id);
+      formData.append("email", email);
+      formData.append("phonenumber", phoneNumber);
+      formData.append("password", password);
+      formData.append("section", section);
+      formData.append("department", department);
+      formData.append("college", college);
+      formData.append("gender", gender);
+      formData.append("year_semester", yearSemester);
+  
+      // Check if a picture has been taken
+      if (picture) {
+        formData.append("face_image", picture);
+      } else {
+        // If no picture has been taken, use the video stream's track
+        formData.append("face_image", videoRef.current.captureStream().getVideoTracks()[0]);
+      }
+      console.log("in form data");
+      const response = await axios.post("http://localhost:8000/api/register/", formData);
+      console.log(response.data); // Assuming backend returns a success message
+  
+      setShowCamera(false);
+      history.push(`/admin`);
+    } catch (error) {
+      console.error("Registration failed:", error);
+      setErrorMessage("Registration failed. Please try again.");
+    }
   };
 
   const handleFullnameChange = (e) => {
@@ -250,6 +300,10 @@ const RegistrationForm = () => {
     setGender(e.target.value);
   };
 
+  const handleCollegeChange = (e) => {
+    setCollege(e.target.value);
+  };
+
   const handleDepartmentChange = (e) => {
     setDepartment(e.target.value);
   };
@@ -271,13 +325,15 @@ const RegistrationForm = () => {
       const mediaStream = videoRef.current.srcObject;
       const videoTrack = mediaStream.getVideoTracks()[0];
       const imageCapture = new ImageCapture(videoTrack);
-
+  
       const blob = await imageCapture.takePhoto();
       const file = new File([blob], "profile_picture.jpg", {
         type: "image/jpeg",
       });
-
-      setPicture(file);
+  
+      setPicture(file); // Update the picture state
+  
+      console.log("Picture state:", picture); // Verify picture state after setting it
     } catch (error) {
       console.error("Error capturing picture:", error);
     }
@@ -489,11 +545,37 @@ const RegistrationForm = () => {
                       </option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
-                      <option value="other">Other</option>
                     </select>
                   </div>
                   {genderError && (
                     <p className="text-red-500 text-sm">{genderError}</p>
+                  )}
+                </div>
+
+                {/* College */}
+                <div className="flex flex-col">
+                  <div className="relative">
+                  <FaBuilding className="absolute top-0 left-0 mt-3 ml-2 mr-4  text-gray-400" />
+
+                    <select
+                      id="college"
+                      value={college}
+                      onChange={handleCollegeChange}
+                      onBlur={validateCollege}
+                      className={`registration-input ${
+                        collegeError ? "border-red-500" : ""
+                      } text-gray-400 pl-10 mb-4 block w-full px-0 mt-3 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200`}
+                    >
+                      <option value="" disabled>
+                        Select College
+                      </option>
+                      <option value="College of Electrical and Mechanical">College of Electrical and Mechanical</option>
+                      <option value="College of Civil and architecture">College of Civil and architecture</option>
+                      {/* Add more options as needed */}
+                    </select>
+                  </div>
+                  {collegeError && (
+                    <p className="text-red-500 text-sm">{collegeError}</p>
                   )}
                 </div>
 
@@ -514,8 +596,9 @@ const RegistrationForm = () => {
                       <option value="" disabled>
                         Select Department
                       </option>
-                      <option value="department1">Department 1</option>
-                      <option value="department2">Department 2</option>
+                      <option value="Software engineering">Software engineering</option>
+                      <option value="Electrical engineering">Electrical engineering</option>
+                      <option value="Architecture">Architecture</option>
                       {/* Add more options as needed */}
                     </select>
                   </div>

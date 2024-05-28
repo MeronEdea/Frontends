@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Tbody,
@@ -9,13 +9,52 @@ import {
   Box,
   Button,
   Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  FormControl,
+  FormLabel,
+  Input,
 } from "@chakra-ui/react";
+import "./CheckTable.css";
 
-export default function CheckTable({ roleData }) {
-  // Placeholder function for handling adding a new role
+export default function CheckTable() {
+  const [roleData, setRoleData] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/roles/")
+      .then((response) => response.json())
+      .then((data) => setRoleData(data))
+      .catch((error) => console.error("Error fetching roles:", error));
+  }, []);
+
   const handleAddRole = () => {
-    // Implement your logic for adding a new role here
-    console.log("Add new role functionality");
+    const newRole = { name: newRoleName };
+
+    fetch("http://localhost:8000/api/roles/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newRole),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to add role");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setRoleData([...roleData, data]);
+        setIsOpen(false); // Close the modal after adding role
+        setNewRoleName(""); // Reset new role name
+      })
+      .catch((error) => console.error("Error adding role:", error));
   };
 
   return (
@@ -29,9 +68,13 @@ export default function CheckTable({ roleData }) {
       overflowX="auto"
     >
       <Flex justify="flex-end" mb="4" mt="14">
-        {/* Button for adding a new role */}
-        <Button onClick={handleAddRole} bg="blue.300" color="white" _hover={{ bg: "blue.500" }}>
-            + New Role
+        <Button
+          onClick={() => setIsOpen(true)}
+          bg="blue.300"
+          color="white"
+          _hover={{ bg: "blue.500" }}
+        >
+          + New Role
         </Button>
       </Flex>
       <Table variant="simple" color="gray.500" mb="24px">
@@ -55,13 +98,37 @@ export default function CheckTable({ roleData }) {
           {roleData.map((role, index) => (
             <Tr key={index}>
               <Td>{index + 1}</Td>
-              <Td>{role.username}</Td>
-              <Td>{role.action}</Td>
-              <Td>{role.permission}</Td>
+              <Td>{role.name}</Td>
+              <Td>Action Placeholder</Td>
+              {/* Display role permissions */}
+              <Td>{role.permissions.map((perm) => perm.codename).join(", ")}</Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
+      {/* Modal for adding new role */}
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add New Role</ModalHeader>
+          <ModalBody>
+            <FormControl>
+              <FormLabel>New Role Name</FormLabel>
+              <Input
+                type="text"
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+              />
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" marginTop={100} onClick={handleAddRole}>
+              Add Role
+            </Button>
+            <Button onClick={() => setIsOpen(false)}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

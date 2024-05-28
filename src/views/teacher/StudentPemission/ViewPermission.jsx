@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -12,20 +12,32 @@ import Sidebar from "../../../components/sidebar/Sidebar";
 import { SidebarContext } from "../../../contexts/SidebarContext";
 import Navbar from "components/navbar/NavbarAdmin.js";
 import routes from "routes.js";
+import axios from "axios";
 
-const ViewPermission = (
-  {
-    fullName = "John Doe",
-    studentID = "123456",
-    section = "A",
-    reason = "Medical Leave",
-    attachedFile = "medical_certificate.pdf",
-  },
-  props
-) => {
+const ViewPermission = () => {
   const history = useHistory();
-  const { ...rest } = props;
-  const [fixed] = useState(false);
+  const { permissionId } = useParams(); // permissionId should be a string
+  const [permissionData, setPermissionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("Fetching permission data for ID:", permissionId);
+        const response = await axios.get(`http://localhost:8000/api/get_permission_details/${permissionId}`);
+        console.log("API response:", response.data);
+        setPermissionData(response.data);
+      } catch (error) {
+        console.error("Error fetching permission data:", error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [permissionId]);
 
   const today = new Date();
   const getRandomColor = (type) => {
@@ -43,43 +55,49 @@ const ViewPermission = (
     return color;
   };
 
-  const approvePermission = () => {
-    // Implement approve permission functionality
+  const getStatusColor = (status) => {
+    if (status === "Present") {
+      return "green";
+    } else if (status === "Absent") {
+      return "red";
+    } else {
+      return "blue";
+    }
   };
 
-  const rejectPermission = () => {
-    // Implement reject permission functionality
+  const approvePermission = async () => {
+    try {
+      await axios.post(`http://localhost:8000/api/approve-permission/${permissionId}`);
+      alert("Permission approved successfully!");
+      // Add logic to handle success
+    } catch (error) {
+      console.error("Error approving permission:", error);
+      alert("Failed to approve permission!");
+      // Add logic to handle error
+    }
+  };
+
+  const rejectPermission = async () => {
+    try {
+      await axios.post(`http://localhost:8000/api/reject-permission/${permissionId}`);
+      alert("Permission rejected successfully!");
+      // Add logic to handle success
+    } catch (error) {
+      console.error("Error rejecting permission:", error);
+      alert("Failed to reject permission!");
+      // Add logic to handle error
+    }
   };
 
   const { onOpen } = useDisclosure();
 
-  // Sample attendance data
-  const attendanceHistory = [
-    { date: "2024-04-01", status: "Present" },
-    { date: "2024-04-02", status: "Absent" },
-    { date: "2024-04-03", status: "Present" },
-    { date: "2024-04-04", status: "Present" },
-    { date: "2024-04-05", status: "Absent" },
-  ];
-
-  // Calculate number of absent, present, and permission days
-  const absentDays = attendanceHistory.filter(
-    (day) => day.status === "Absent"
-  ).length;
-  const presentDays = attendanceHistory.filter(
-    (day) => day.status === "Present"
-  ).length;
-  const permissionDays = attendanceHistory.filter(
-    (day) => day.status === "Permission"
-  ).length;
-
   return (
     <Box>
       <SidebarContext.Provider value={{ isOpen: true, toggleOpen: () => {} }}>
-        <Sidebar routes={routes} display="none" {...rest} />
+        <Sidebar routes={routes} display="none" />
       </SidebarContext.Provider>
       <Box className="ml-80">
-        <Navbar onOpen={onOpen} brandText="Edit Schedule" {...rest} />
+        <Navbar onOpen={onOpen} brandText="Edit Schedule" />
         <Container maxWidth={false}>
           <Divider style={{ marginBottom: 20 }} />
           <Box className="mt-2 mb-2 flex-grow py-8">
@@ -97,99 +115,92 @@ const ViewPermission = (
                 <hr className="flex-grow border-gray-300" />
               </div>
               <div className="mt-8 p-6 px-0 overflow-scroll">
-                <div className="flex flex-wrap justify-between">
-                  <div className="w-48">
-                    <p className="text-lg font-semibold text-blue-400 mt-2">Full Name:</p>
-                    <p className="text-lg font-bold text-blue-400 mt-4">Section:</p>
-                    <p className="text-lg font-bold text-blue-400 mt-6">Attached File:</p>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg  mb-4 bg-blue-100 text-gray-500 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
-                      {fullName}
-                    </p>
-                    <p className="text-lg  mb-4 bg-blue-100 text-gray-500 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
-                      {section}
-                    </p>
-                    <p className="text-lg  mb-4 bg-blue-100 text-gray-500 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
-                      {attachedFile}
-                    </p>
-                  </div>
-                  <div className="w-20">
-                    <p className="text-lg font-bold text-blue-400 mt-2">ID:</p>
-                    <p className="text-lg font-bold  text-blue-400 mt-6">Reason:</p>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg  mb-4 text-gray-500 bg-blue-100 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">{studentID}</p>
-                    <p className="text-lg  text-gray-500 mb-4 bg-blue-100 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">{reason}</p>
-
-                  </div>
-                </div>
-
-                <div className="flex mt-4">
-                  <Button
-                    colorScheme="blue"
-                    onClick={approvePermission}
-                    size="md"
-                    color="white"
-                    className="ml-64"
-                    _hover={{ bg: "white", color: "blue.500" }}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    colorScheme="red"
-                    onClick={rejectPermission}
-                    size="md"
-                    className="ml-72"
-                    color="white"
-                    _hover={{ bg: "white", color: "red.500" }}
-                  >
-                    Reject
-                  </Button>
-                </div>
-
-                <br />
-                <hr className="mt-8" />
-                <Text className="text-2xl font-bold mt-8 mb-8 text-blue-500"
-                  
-                >
-                  Attendance History of {fullName}:
-                </Text>
-                <div className="flex flex-wrap gap-4">
-                  <Box
-                    bgColor={getRandomColor("Present")}
-                    padding="30px"
-                    borderRadius="md"
-                    width="333px"
-                  >
-                    <Text fontSize="lg" fontWeight="bold" color="green">
-                      Present Days:
+                {loading ? (
+                  <Text>Loading...</Text>
+                ) : error ? (
+                  <Text>Error loading permission data: {error.message}</Text>
+                ) : (
+                  permissionData && permissionData.student && (
+                    <div className="flex flex-wrap justify-between">
+                      <div className="w-48">
+                        <p className="text-lg font-semibold text-blue-400 mt-2">Full Name:</p>
+                        <p className="text-lg font-bold text-blue-400 mt-4">Section:</p>
+                        <p className="text-lg font-bold text-blue-400 mt-6">Attached File:</p>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-lg mb-4 bg-blue-100 text-gray-500 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
+                          {permissionData.student.fullName}
+                        </p>
+                        <p className="text-lg mb-4 bg-blue-100 text-gray-500 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
+                          {permissionData.student.section}
+                        </p>
+                        <p className="text-lg mb-4 bg-blue-100 text-gray-500 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
+                          {permissionData.permission.attachedFile}
+                        </p>
+                      </div>
+                      <div className="w-20">
+                        <p className="text-lg font-bold text-blue-400 mt-2">ID:</p>
+                        <p className="text-lg font-bold text-blue-400 mt-6">Reason:</p>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-lg mb-4 text-gray-500 bg-blue-100 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
+                          {permissionData.student.studentID}
+                        </p>
+                        <p className="text-lg text-gray-500 mb-4 bg-blue-100 rounded-md w-56 pl-4 pr-4 pt-1 pb-1">
+                          {permissionData.permission.reason}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                )}
+                {permissionData && permissionData.student && (
+                  <>
+                    <div className="flex mt-4">
+                      <Button
+                        colorScheme="blue"
+                        onClick={approvePermission}
+                        size="md"
+                        color="white"
+                        className="ml-64"
+                        _hover={{ bg: "white", color: "blue.500" }}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        colorScheme="red"
+                        onClick={rejectPermission}
+                        size="md"
+                        className="ml-72"
+                        color="white"
+                        _hover={{ bg: "white", color: "red.500" }}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                    <br />
+                    <hr className="mt-8" />
+                    <Text className="text-2xl font-bold mt-8 mb-8 text-blue-500">
+                      Attendance History of {permissionData.student.fullName}:
                     </Text>
-                    <Text>{presentDays}</Text>
-                  </Box>
-                  <Box
-                    bgColor={getRandomColor("Absent")}
-                    padding="30px"
-                    borderRadius="md"
-                    width="333px"
-                  >
-                    <Text fontSize="lg" fontWeight="bold" color="red">
-                      Absent Days:
-                    </Text>
-                    <Text>{absentDays}</Text>
-                  </Box>
-                  <Box
-                    bgColor={getRandomColor("Permission")}
-                    padding="30px"
-                    borderRadius="md"
-                    width="333px"
-                  >
-                    <Text fontSize="lg" fontWeight="bold" color="blue">
-                      Permission Days:
-                    </Text>
-                    <Text>{permissionDays}</Text>
-                  </Box>
-                </div>
+                    <div className="flex flex-wrap gap-4">
+                      {permissionData.attendance_history &&
+                        permissionData.attendance_history.map((attendance) => (
+                          <Box
+                            key={attendance.date}
+                            bgColor={getRandomColor(attendance.status)}
+                            padding="30px"
+                            borderRadius="md"
+                            width="333px"
+                          >
+                            <Text fontSize="lg" fontWeight="bold" color={getStatusColor(attendance.status)}>
+                              Date: {attendance.date}
+                            </Text>
+                            <Text>Status: {attendance.status}</Text>
+                          </Box>
+                        ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </Box>

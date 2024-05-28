@@ -1,590 +1,114 @@
-import React, { useState } from "react";
-import "./AdminHR.css";
-import axios from "axios";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useState, useEffect } from 'react';
+import './AdminHR.css';
+import axios from 'axios';
 
 const AdminHR = () => {
-  const [activeTab, setActiveTab] = useState("course");
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      college: "College A",
-      department: "Department A",
-      name: "Database",
-      code: "SWEG101",
-    },
-    {
-      id: 2,
-      college: "College B",
-      department: "Department B",
-      name: "Software evolution",
-      code: "SWEG101",
-    },
-    {
-      id: 3,
-      college: "College C",
-      department: "Department C",
-      name: "Machine learning",
-      code: "SWEG231",
-    },
-  ]);
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      name: "Solomon Ashenafi",
-      department: "Software",
-      email: "Database",
-      course: "SWEG101",
-    },
-    {
-      id: 2,
-      name: "Hana chanie",
-      department: "Electrical",
-      email: "mechanics",
-      course: "SWEG101",
-    },
-    {
-      id: 3,
-      name: "Tsedey Mekonnen",
-      department: "Software",
-      email: "evolution",
-      course: "SWEG101",
-    },
-  ]);
+  const [activeTab, setActiveTab] = useState('teacher');
+  const [teachers, setTeachers] = useState([]);
+  const [showAddTeacherPopup, setShowAddTeacherPopup] = useState(false);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  const addCourse = (course) => {
-    setCourses([...courses, course]);
-  };
-
-  const deleteCourse = (id) => {
-    if (window.confirm("Are you sure you want to delete this course?")) {
-      setCourses(courses.filter((course) => course.id !== id));
+  const fetchTeachers = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/teachers/');
+      setTeachers(response.data);
+    } catch (error) {
+      console.error('Error fetching teachers:', error.message);
     }
   };
 
-  const editCourse = (id, updatedCourse) => {
-    const updatedCourses = courses.map((course) =>
-      course.id === id ? updatedCourse : course
-    );
-    setCourses(updatedCourses);
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
+
+  const addTeacher = async (teacher) => {
+    try {
+      const response = await axios.post('http://localhost:8000/api/add_teacher/', teacher);
+      setTeachers([...teachers, response.data]);
+      setShowAddTeacherPopup(false); // Close the pop-up after adding teacher
+    } catch (error) {
+      console.error('Error adding teacher:', error.message);
+    }
   };
 
-  const addTeacher = (teacher) => {
-    setTeachers([...teachers, teacher]);
-  };
-
-  const deleteTeacher = (index) => {
+  const deleteTeacher = async (id) => {
     if (window.confirm("Are you sure you want to delete this teacher?")) {
-      setTeachers(teachers.filter((_, i) => i !== index));
+      try {
+        await axios.delete(`http://localhost:8000/api/delete_teacher/${id}/`);
+        setTeachers(teachers.filter(teacher => teacher.id !== id));
+      } catch (error) {
+        console.error('Error deleting teacher:', error.message);
+      }
     }
   };
-
-  const editTeacher = (index, updatedTeacher) => {
-    const updatedTeachers = teachers.map((teacher, i) =>
-      i === index ? updatedTeacher : teacher
-    );
-    setTeachers(updatedTeachers);
+  
+  const editTeacher = async (id, updatedTeacher) => {
+    try {
+      await axios.put(`http://localhost:8000/api/edit_teacher/${id}/`, updatedTeacher);
+      const updatedTeachers = teachers.map(teacher => (teacher.id === id ? updatedTeacher : teacher));
+      setTeachers(updatedTeachers);
+    } catch (error) {
+      console.error('Error editing teacher:', error.message);
+    }
   };
 
   return (
     <div className="admin-hr-page">
-      <div className="flex justify-center items-center space-x-24 mb-4 ">
-        <div
-          className={`py-2 px-4 rounded-lg cursor-pointer ${
-            activeTab === "course" ? "bg-blue-200" : "bg-blue-500"
-          }`}
-          onClick={() => handleTabChange("course")}
-        >
-          Course Management
-        </div>
-        <div
-          className="w-4" // Adjust width for spacing
-        ></div>{" "}
-        {/* Spacer */}
-        <div
-          className={`py-2 px-4 rounded-lg cursor-pointer ${
-            activeTab === "teacher" ? "bg-blue-200" : "bg-blue-500"
-          }`}
-          onClick={() => handleTabChange("teacher")}
-        >
+      <div className="header">
+        <div className="tab" onClick={() => handleTabChange('teacher')}>
           Teacher Management
         </div>
-        <div
-          className="w-4" // Adjust width for spacing
-        ></div>{" "}
-        {/* Spacer */}
-        <div
-          className={`py-2 px-4 rounded-lg cursor-pointer ${
-            activeTab === "schedule" ? "bg-blue-200" : "bg-blue-500"
-          }`}
-          onClick={() => handleTabChange("schedule")}
-        >
-          Schedule Management
-        </div>
       </div>
-
       <div className="admin-hr-content">
-        {activeTab === "course" ? (
-          <CourseManagement
-            courses={courses}
-            addCourse={addCourse}
-            deleteCourse={deleteCourse}
-            editCourse={editCourse}
-          />
-        ) : activeTab === "teacher" ? (
-          <TeacherManagement
-            teachers={teachers}
-            addTeacher={addTeacher}
-            deleteTeacher={deleteTeacher}
-            editTeacher={editTeacher}
-            courses={courses}
-          />
-        ) : activeTab === "schedule" ? (
-          <ScheduleManagement /> // Render the ScheduleManagement component
+        {activeTab === 'teacher' ? (
+          <TeacherManagement teachers={teachers} deleteTeacher={deleteTeacher} editTeacher={editTeacher} />
         ) : null}
       </div>
+      {showAddTeacherPopup && <AddTeacherPopup addTeacher={addTeacher} setShowAddTeacherPopup={setShowAddTeacherPopup} />}
+      <button className="add-teacher-btn" onClick={() => setShowAddTeacherPopup(true)}>Add New Teacher</button>
     </div>
   );
 };
 
-const CourseManagement = ({ courses, addCourse, deleteCourse, editCourse }) => {
+const TeacherManagement = ({ teachers, deleteTeacher, editTeacher }) => {
   const [editingId, setEditingId] = useState(null);
-  const [editedCollege, setEditedCollege] = useState("");
-  const [editedDepartment, setEditedDepartment] = useState("");
-  const [editedName, setEditedName] = useState("");
-  const [editedCode, setEditedCode] = useState("");
-  const [editedDuration, setEditedDuration] = useState("");
-  const [editedYear, setEditedYear] = useState("");
-  const [editedPrerequest, setEditedPrerequest] = useState("");
 
-  const handleEditClick = (id) => {
+  const handleEditTeacher = (id, teacherData) => {
     setEditingId(id);
-    const courseToEdit = courses.find((course) => course.id === id);
-    setEditedCollege(courseToEdit.college);
-    setEditedDepartment(courseToEdit.department);
-    setEditedName(courseToEdit.name);
-    setEditedDuration(courseToEdit.code);
-    setEditedYear(courseToEdit.code);
-    setEditedPrerequest(courseToEdit.code);
+    // Implement logic to populate form fields with teacherData
   };
 
-  const handleSaveEdit = (id) => {
-    const updatedCourse = {
-      id,
-      college: editedCollege,
-      department: editedDepartment,
-      name: editedName,
-      code: editedCode,
-      duration: editedDuration,
-      year: editedYear,
-      prerequest: editedPrerequest,
-    };
-    editCourse(id, updatedCourse);
+  const handleSaveEdit = (id, updatedTeacher) => {
+    editTeacher(id, updatedTeacher);
     setEditingId(null);
-  };
-
-  const handleAddCourse = () => {
-    if (
-      editedCollege.trim() !== "" &&
-      editedDepartment.trim() !== "" &&
-      editedName.trim() !== "" &&
-      editedCode.trim() !== "" &&
-      editedDuration.trim() !== "" &&
-      editedYear.trim() !== "" &&
-      editedPrerequest.trim() !== ""
-    ) {
-      const newCourse = {
-        college: editedCollege,
-        department: editedDepartment,
-        name: editedName,
-        code: editedCode,
-        duration: editedDuration,
-        year: editedYear,
-        prerequest: editedPrerequest,
-      };
-      addCourse(newCourse);
-      // Reset form fields after submission
-      setEditedCollege("");
-      setEditedDepartment("");
-      setEditedName("");
-      setEditedCode("");
-      setEditedDuration("");
-      setEditedYear("");
-      setEditedPrerequest("");
-    }
-  };
-
-  return (
-    <div className="course-management">
-      <h3>Add Course</h3>
-      <div className="add-course-form">
-        <input
-          type="text"
-          value={editedCollege}
-          onChange={(e) => setEditedCollege(e.target.value)}
-          placeholder="College"
-          className="college-input"
-        />
-        <input
-          type="text"
-          value={editedDepartment}
-          onChange={(e) => setEditedDepartment(e.target.value)}
-          placeholder="Department"
-          className="department-input"
-        />
-        <input
-          type="text"
-          value={editedName}
-          onChange={(e) => setEditedName(e.target.value)}
-          placeholder="Course Name"
-          className="course-name-input"
-        />
-        <input
-          type="text"
-          value={editedCode}
-          onChange={(e) => setEditedCode(e.target.value)}
-          placeholder="Course Code"
-          className="course-code-input"
-        />
-        <input
-          type="text"
-          value={editedDuration}
-          onChange={(e) => setEditedDuration(e.target.value)}
-          placeholder="Course Duration"
-          className="course-duration-input"
-        />
-        <input
-          type="text"
-          value={editedYear}
-          onChange={(e) => setEditedYear(e.target.value)}
-          placeholder="Course Year"
-          className="course-year-input"
-        />
-        <input
-          type="text"
-          value={editedPrerequest}
-          onChange={(e) => setEditedPrerequest(e.target.value)}
-          placeholder="Course Prerequest"
-          className="course-prerequest-input"
-        />
-        <button onClick={handleAddCourse} className="add-course-button">
-          Add Course
-        </button>
-      </div>
-      <h3>List of Courses</h3>
-      <table className="course-list-table">
-        <thead>
-          <tr>
-            <th>College</th>
-            <th>Department</th>
-            <th>Course Name</th>
-            <th>Course Code</th>
-            <th>Duration</th>
-            <th>Year</th>
-            <th>Prerequest</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courses.map((course) => (
-            <tr key={course.id}>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedCollege}
-                    onChange={(e) => setEditedCollege(e.target.value)}
-                  />
-                ) : (
-                  course.college
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedDepartment}
-                    onChange={(e) => setEditedDepartment(e.target.value)}
-                  />
-                ) : (
-                  course.department
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                  />
-                ) : (
-                  course.name
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedCode}
-                    onChange={(e) => setEditedCode(e.target.value)}
-                  />
-                ) : (
-                  course.code
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedDuration}
-                    onChange={(e) => setEditedDuration(e.target.value)}
-                  />
-                ) : (
-                  course.duration
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedYear}
-                    onChange={(e) => setEditedYear(e.target.value)}
-                  />
-                ) : (
-                  course.year
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <input
-                    type="text"
-                    value={editedPrerequest}
-                    onChange={(e) => setEditedPrerequest(e.target.value)}
-                  />
-                ) : (
-                  course.prerequest
-                )}
-              </td>
-              <td>
-                {editingId === course.id ? (
-                  <button onClick={() => handleSaveEdit(course.id)}>
-                    Save
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      className="edit-button"
-                      onClick={() => handleEditClick(course.id)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-button"
-                      onClick={() => deleteCourse(course.id)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-const TeacherManagement = ({
-  teachers,
-  addTeacher,
-  deleteTeacher,
-  editTeacher,
-  courses,
-}) => {
-  const initialTeacherState = {
-    name: "",
-    email: "",
-    department: "",
-    semester: "", // Changed from selectedCourse
-    phone_number: "",
-    gender: "",
-    college: "",
-    qualifications: "",
-  };
-
-  const [teacherData, setTeacherData] = useState(initialTeacherState);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setTeacherData({
-      ...teacherData,
-      [name]: value,
-    });
-  };
-  const handleAddTeacher = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("name", teacherData.name);
-      formData.append("email", teacherData.email);
-      formData.append("department", teacherData.department);
-      formData.append("phone_number", teacherData.phone_number);
-      formData.append("gender", teacherData.gender);
-      formData.append("college", teacherData.college);
-      formData.append("qualifications", teacherData.qualifications);
-      formData.append("selectedCourse", teacherData.selectedCourse);
-
-      // Append profile picture if selected
-      if (teacherData.profilePicture) {
-        formData.append("profile_picture", teacherData.profilePicture);
-      }
-
-      // Log form data before making the request
-      console.log("Form Data:", formData);
-
-      const response = await axios.post(
-        "http://localhost:8000/api/add_teacher/",
-        formData
-      );
-
-      console.log("Response from backend:", response.data);
-
-      // Assuming addTeacher and setTeacherData are defined elsewhere
-      addTeacher(response.data);
-      setTeacherData(initialTeacherState);
-    } catch (error) {
-      console.error("Error adding teacher:", error.message);
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error("Response status:", error.response.status);
-        console.error("Response data:", error.response.data);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("No response received:", error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Error in request setup:", error.message);
-      }
-      // Handle error
-    }
   };
 
   return (
     <div className="teacher-management">
-      <h3>Add Teacher</h3>
-      <div className="add-teacher-form">
-        <input
-          type="text"
-          name="name"
-          value={teacherData.name}
-          onChange={handleChange}
-          placeholder="Name"
-          className="name-input"
-        />
-        <input
-          type="email"
-          name="email"
-          value={teacherData.email}
-          onChange={handleChange}
-          placeholder="Email"
-          className="email-input"
-        />
-        <input
-          type="text"
-          name="department"
-          value={teacherData.department}
-          onChange={handleChange}
-          placeholder="Department"
-          className="department-input"
-        />
-        <input
-          type="text"
-          name="semester" // Changed from selectedCourse
-          value={teacherData.semester} // Changed from selectedCourse
-          onChange={handleChange} // Changed from selectedCourse
-          placeholder="Semester" // Changed from selectedCourse
-          className="semester-input" // Changed from selectedCourse
-        />
-        <input
-          type="text"
-          name="phone_number"
-          value={teacherData.phone_number}
-          onChange={handleChange}
-          placeholder="Phone Number"
-          className="phone-number-input"
-        />
-        <input
-          type="text"
-          name="gender"
-          value={teacherData.gender}
-          onChange={handleChange}
-          placeholder="Gender"
-          className="gender-input"
-        />
-        <input
-          type="text"
-          name="college"
-          value={teacherData.college}
-          onChange={handleChange}
-          placeholder="College"
-          className="college-input"
-        />
-        <input
-          type="text"
-          name="qualifications"
-          value={teacherData.qualifications}
-          onChange={handleChange}
-          placeholder="Qualifications"
-          className="qualifications-input"
-        />
-        <button onClick={handleAddTeacher} className="add-teacher-button">
-          Add Teacher
-        </button>
-      </div>
       <h3>List of Teachers</h3>
-      <table className="teacher-list-table">
+      <table>
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
-            <th>Department</th>
-            <th>Semester</th>
-            <th>Phone Number</th>
-            <th>Gender</th>
-            <th>College</th>
-            <th>Qualifications</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {teachers.map((teacher, index) => (
-            <tr key={index}>
-              <td>{teacher.name}</td>
-              <td>{teacher.email}</td>
-              <td>{teacher.department}</td>
-              <td>{teacher.semester}</td>
-              <td>{teacher.phone_number}</td>
-              <td>{teacher.gender}</td>
-              <td>{teacher.college}</td>
-              <td>{teacher.qualifications}</td>
+          {teachers.map((teacher) => (
+            <tr key={teacher.id}>
+              <td>{editingId === teacher.id ? <input type="text" value={teacher.name} /> : teacher.name}</td>
+              <td>{editingId === teacher.id ? <input type="email" value={teacher.email} /> : teacher.email}</td>
               <td>
-                <button
-                  className="edit-button"
-                  onClick={() => editTeacher(index)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="delete-button"
-                  onClick={() => deleteTeacher(index)}
-                >
-                  Delete
-                </button>
+                {editingId === teacher.id ? (
+                  <button onClick={() => handleSaveEdit(teacher.id, {/* Pass updated teacher data */})}>Save</button>
+                ) : (
+                  <button className="edit-btn" onClick={() => handleEditTeacher(teacher.id, teacher)}>Edit</button>
+                )}
+                <button className="delete-btn" onClick={() => deleteTeacher(teacher.id)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -594,125 +118,76 @@ const TeacherManagement = ({
   );
 };
 
-const ScheduleManagement = () => {
-  // State for managing schedules
-  const [schedules, setSchedules] = useState([]);
-  const [file, setFile] = useState(null);
+const AddTeacherPopup = ({ addTeacher, setShowAddTeacherPopup }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
-  // Function to handle file upload
-  const handleFileUpload = (uploadedFile) => {
-    if (uploadedFile) {
-      if (validateFileType(uploadedFile)) {
-        setFile(uploadedFile);
-      } else {
-        alert("Please select only Excel or CSV file.");
-      }
-    }
-  };
-
-  // Function to handle schedule upload
- const uploadSchedule = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      // Make a POST request to upload the schedule
-      const response = await axios.post(
-        "http://localhost:8000/api/upload_schedule/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      // Handle success
-      console.log("Response from backend:", response.data);
-      // Update the schedules state with the response data
-      setSchedules(response.data.schedules);
-
-      // Reset the file state
-      setFile(null);
-
-      // Show success toast message
-      toast.success("File uploaded successfully!", {
-        position: toast.POSITION.TOP_CENTER,
-      });
-    } catch (error) {
-      // Handle error
-      console.error("Error uploading schedule:", error);
-
-      // Show error toast message
-      toast.error("Failed to upload file. Please try again later.", {
-        position: toast.POSITION.TOP_CENTER,
-      });
-    }
-  };
-
-  // Function to validate file type
-  const validateFileType = (file) => {
-    const allowedExtensions = ["xlsx", "xls", "csv"];
-    const fileType = file.name.split(".").pop();
-    return allowedExtensions.includes(fileType);
-  };
-
-  // Function to handle drag over event
-  const handleDragOver = (event) => {
-    event.preventDefault();
-  };
-
-  // Function to handle drop event
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const uploadedFile = event.dataTransfer.files[0];
-    handleFileUpload(uploadedFile);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    addTeacher({ name, email });
   };
 
   return (
-    <div
-      className="bg-gray-100 p-8 rounded-lg shadow-md text-center"
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-    >
-      <div className="border-dashed border-2 border-gray-300 p-8 rounded-lg mb-4">
-        <label
-          htmlFor="fileInput"
-          className="text-gray-500 text-lg block mb-2 cursor-pointer"
-        >
-          Drag & drop files to upload or click here
-        </label>
-        <input
-          type="file"
-          id="fileInput"
-          onChange={(e) => handleFileUpload(e.target.files[0])}
-          className="hidden"
-          accept=".csv,.xlsx,.xls"
+    <div className="add-teacher-popup">
+      <form onSubmit={handleSubmit}>
+        <input 
+          type="text" 
+          placeholder="Name" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+          required 
         />
-        <div
-          className="flex items-center justify-center"
-          onClick={() => document.getElementById("fileInput").click()}
-        >
-          <div className="bg-white border border-gray-300 p-4 rounded-lg cursor-pointer">
-            Browse Files
-          </div>
-        </div>
-        {file && (
-          <div className="mt-4">
-            <span className="text-gray-500">Selected file:</span>{" "}
-            <span>{file.name}</span>
-          </div>
-        )}
-      </div>
-      <button
-        onClick={uploadSchedule}
-        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
-      >
-        Upload Schedule
-      </button>
-      {/* Display schedules here */}
+        <input 
+          type="email" 
+          placeholder="Email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          required 
+        />
+        <button type="submit">Add Teacher</button>
+        <button type="button" onClick={() => setShowAddTeacherPopup(false)}>Cancel</button>
+      </form>
     </div>
   );
 };
 
 export default AdminHR;
+
+
+
+// return (
+//   <div className="admin-hr-page">
+//     <div className="header">
+//       <div className="tab" onClick={() => handleTabChange('teacher')}>
+//         Teacher Management
+//       </div>
+//     </div>
+//     <div className="admin-hr-content">
+//       {/* Rendering of teacher management component */}
+//     </div>
+//     {showAddTeacherPopup && (
+//       <div className="overlay">
+//         <div className="add-teacher-popup">
+//           <h3>Add Teacher</h3>
+//           <input 
+//             type="text" 
+//             placeholder="Name" 
+//             value={newTeacher.name} 
+//             onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })} 
+//             required 
+//           />
+//           <input 
+//             type="email" 
+//             placeholder="Email" 
+//             value={newTeacher.email} 
+//             onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })} 
+//             required 
+//           />
+//           <button onClick={addTeacher}>Add Teacher</button>
+//           <button onClick={() => setShowAddTeacherPopup(false)}>Cancel</button>
+//         </div>
+//       </div>
+//     )}
+//     <button className="add-teacher-btn" onClick={() => setShowAddTeacherPopup(true)}>Add New Teacher</button>
+//   </div>
+// );
