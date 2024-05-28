@@ -1,24 +1,27 @@
-import React, { useState } from 'react';
-import {  Switch, Redirect, Route } from 'react-router-dom';
-import { Box, Portal, useDisclosure } from '@chakra-ui/react';
+// Chakra imports
+import { Portal, Box, useDisclosure, Text, Button, Link } from '@chakra-ui/react';
 import Footer from 'components/footer/FooterAdmin.js';
+// Layout components
 import Navbar from 'components/navbar/NavbarAdmin.js';
 import Sidebar from 'components/sidebar/Sidebar.js';
 import { SidebarContext } from 'contexts/SidebarContext';
+import React, { useState } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import routes from 'routes.js';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
+	console.log("student layout");
 	const { ...rest } = props;
-	
+	// states and functions
 	const [ fixed ] = useState(false);
 	const [ toggleSidebar, setToggleSidebar ] = useState(false);
-	
+	// functions for changing the states from components
 	const getRoute = () => {
-		return window.location.pathname !== '/admin/full-screen-maps';
+		return window.location.pathname !== '/student/full-screen-maps';
 	};
 	const getActiveRoute = (routes) => {
-		let activeRoute = 'admin';
+		let activeRoute = 'student';
 		for (let i = 0; i < routes.length; i++) {
 			if (routes[i].collapse) {
 				let collapseActiveRoute = getActiveRoute(routes[i].items);
@@ -39,6 +42,7 @@ export default function Dashboard(props) {
 		return activeRoute;
 	};
 	const getActiveNavbar = (routes) => {
+		console.log("routes",routes);
 		let activeNavbar = false;
 		for (let i = 0; i < routes.length; i++) {
 			if (routes[i].collapse) {
@@ -81,8 +85,11 @@ export default function Dashboard(props) {
 		return activeNavbar;
 	};
 	const getRoutes = (routes) => {
-		return routes.map((prop, key) => {
-			if (prop.layout === '/admin') {
+		const allowedRoutes = routes.filter(route => route.allowedRoles.includes(props.role));
+		return allowedRoutes.map((prop, key) => {
+			if (prop.layout === `/${props.role}`) {
+				console.log("Prop layout: ")
+				console.log(prop.layout);
 				return <Route path={prop.layout + prop.path} component={prop.component} key={key} />;
 			}
 			if (prop.collapse) {
@@ -95,6 +102,7 @@ export default function Dashboard(props) {
 			}
 		});
 	};
+	
 	document.documentElement.dir = 'ltr';
 	const { onOpen } = useDisclosure();
 	document.documentElement.dir = 'ltr';
@@ -137,7 +145,7 @@ export default function Dashboard(props) {
 							<Box mx='auto' p={{ base: '20px', md: '30px' }} pe='20px' minH='100vh' pt='50px'>
 								<Switch>
 									{getRoutes(routes)}
-									<Redirect from='/' to='/admin/default' />
+									<Redirect from='/' to='/student/default' />
 								</Switch>
 							</Box>
 						) : null}

@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./PermissionPage.css"; // Import the CSS file
+import {jwtDecode} from 'jwt-decode';
 
 function PermissionPage() {
-  // Sample list of teachers
-  const teachers = ["Teacher 1", "Teacher 2", "Teacher 3"];
-
-  // State variables to store form data and validation status
+  const [teachers, setTeachers] = useState([]);
   const [teacher, setTeacher] = useState("");
   const [reason, setReason] = useState("");
   const [evidence, setEvidence] = useState(null); // Change to null initially
@@ -14,8 +13,22 @@ function PermissionPage() {
   const [reasonError, setReasonError] = useState("");
   const [fileSizeError, setFileSizeError] = useState("");
 
+  // Fetch the list of teachers from the server
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/teachers/");
+        setTeachers(response.data);
+      } catch (error) {
+        console.error("Error fetching teachers:", error);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
+
   // Function to handle form submission
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     // Perform form validation
     if (!teacher) {
@@ -40,22 +53,48 @@ function PermissionPage() {
     } else {
       setFileSizeError("");
     }
-    // Perform submission logic here (e.g., send data to server)
-    console.log("Teacher:", teacher);
-    console.log("Reason:", reason);
-    console.log("Evidence:", evidence);
-    console.log("Sick leave requested:", sickLeave);
-    // Reset form fields after submission
-    setTeacher("");
-    setReason("");
-    setEvidence(null);
-    setSickLeave(false);
+
+    try {
+      // Fetch the user details to retrieve the associated student ID
+      const response = await fetch("http://localhost:8000/api/profile/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
+        const profileData = await response.json();
+        const studentId = profileData.student_id;
+       
+      // const userData = response.data;
+      // const studentId = userData.student_id;
+      // console.log("studentId:", studentId);
+
+      const formData = new FormData();
+      formData.append("teacher", teacher);
+      formData.append("reason", reason);
+      formData.append("evidence", evidence);
+      formData.append("sickLeave", sickLeave);
+      formData.append("studentId", studentId); // Include student ID in the formData
+
+      const submitResponse = await axios.post("http://localhost:8000/api/create_permission/", formData);
+      console.log(submitResponse.data);
+      // Reset form fields after successful submission
+      setTeacher("");
+      setReason("");
+      setEvidence(null);
+      setSickLeave(false);
+    } catch (error) {
+      console.error("Error submitting permission request:", error);
+    }
   };
 
   // Function to handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setEvidence(file);
+    console.log("Selected File:", file); // Add this line
   };
 
   return (
@@ -72,9 +111,9 @@ function PermissionPage() {
               required
             >
               <option value="">Select Teacher</option>
-              {teachers.map((teacher, index) => (
-                <option key={index} value={teacher}>
-                  {teacher}
+              {teachers.map((teacherData) => (
+                <option key={teacherData.id} value={teacherData.name}>
+                  {teacherData.name}
                 </option>
               ))}
             </select>

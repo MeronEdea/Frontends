@@ -2,12 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'assets/css/App.css';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
-import AuthLayout from 'layouts/auth';
+import StudentLayout from 'layouts/student';
 import AdminLayout from 'layouts/admin';
 import TeacherLayout from 'layouts/teacher';
 import { ChakraProvider } from '@chakra-ui/react';
 import theme from 'theme/theme';
 import { ThemeEditorProvider } from '@hypertheme-editor/chakra-ui';
+
+import RouteGuard from './RouteGuard';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ViewCoursePage from "./views/teacher/courses/components/view";
@@ -25,38 +27,41 @@ import LandingPage from "./views/LandingPage/LandingPage";
 import Register from "./views/auth/signIn/index";
 import Login from "./views/auth/signIn/LoginForm";
 import ForgotPwd from "./views/auth/signIn/ForgotPasswordProcess";
+import ProfilePage from './views/student/profile/index';
+import TeacherCourseSelection from "./views/teacher/courses/components/TeacherCourseSelection";
 
 
 
 ReactDOM.render(
-	<ChakraProvider theme={theme}>
-		<React.StrictMode>
-			<ThemeEditorProvider>
-				<HashRouter>
-					<Switch>
-						<Route exact path="/" component={LandingPage} />
-						<Route path={`/auth`} component={AuthLayout} />
-						<Route path={`/admin`} component={AdminLayout} />
-						<Route path={`/teacher`} component={TeacherLayout} />
-						<Route path="/courses/:index" render={(props) => <ViewCoursePage {...props} tableData={tableData} students={studentData} />} />
-						<Route path="/attendance-history" component={AttendanceHistory} />
-						<Route path="/detailed-report/:id" component={DetailedReport} />
-						<Route path="/student-permission" component={StudentPermission} />
-						<Route path="/view-permission" component={ViewPermission} />
-						<Route path="/course-management" component={CourseManagement} />
-						<Route path="/view-schedule" component={ViewSchedule} />
-						<Route path="/add-schedule" component={AddSchedule} />
-						<Route path="/edit-schedule/:id" component={EditSchedule} />
-						<Route path="/signup" component={Register} />
-						<Route path="/signin" component={Login} />
-						<Route path="/forgotpwd" component={ForgotPwd} />
-						{/* <ToastContainer /> */}
-
-						<Redirect from='/' to='/admin' />
-					</Switch>
-				</HashRouter>
-			</ThemeEditorProvider>
-		</React.StrictMode>
-	</ChakraProvider>,
-	document.getElementById('root')
+  <ChakraProvider theme={theme}>
+    <React.StrictMode>
+      <ThemeEditorProvider>
+        <HashRouter>
+          <Switch>
+            <Route exact path="/" component={LandingPage} />
+            <Route path={`/student`} component={StudentLayout} />
+            <Route path={`/admin`} component={AdminLayout} />
+            <Route path={`/teacher`} component={TeacherLayout} />
+            <RouteGuard path="/courses/:index" component={(props) => <ViewCoursePage {...props} tableData={tableData} students={studentData} />} allowedRoles={["teacher"]} />
+            <RouteGuard path="/attendance-history" component={AttendanceHistory} allowedRoles={["teacher"]} />
+            <RouteGuard path="/detailed-report/:id" component={DetailedReport} allowedRoles={["teacher"]} />
+            <RouteGuard path="/student-permission" component={StudentPermission} allowedRoles={["student"]} />
+            <RouteGuard path="/view-permission/:permissionId" component={ViewPermission} allowedRoles={["teacher"]} />
+            <RouteGuard path="/course-management" component={CourseManagement} allowedRoles={["admin"]} />
+            <RouteGuard path="/view-schedule" component={ViewSchedule} allowedRoles={["teacher"]} />
+            <RouteGuard path="/add-schedule" component={AddSchedule} allowedRoles={["teacher"]} />
+            <RouteGuard path="/edit-schedule/:id" component={EditSchedule} allowedRoles={["teacher"]} />
+            <RouteGuard path="/profile-settings" component={() => (<AdminLayout><ProfilePage/></AdminLayout>
+            )} allowedRoles={["teacher", "student", "admin"]} />
+            <Route path="/signup" component={Register} />
+            <Route path="/signin" component={Login} />
+            <Route path="/forgotpwd" component={ForgotPwd} />
+            <RouteGuard path="/teacher-course-selection" component={TeacherCourseSelection} allowedRoles={["teacher"]} />
+            <Redirect from='/' to='/admin' />
+          </Switch>
+        </HashRouter>
+      </ThemeEditorProvider>
+    </React.StrictMode>
+  </ChakraProvider>,
+  document.getElementById('root')
 );

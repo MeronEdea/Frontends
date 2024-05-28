@@ -1,157 +1,179 @@
-import React, { useState } from 'react';
-import avatars7 from './avatar7.png';
+import React, { useState, useEffect } from "react";
+import avatars7 from "./avatar7.png";
+import './ProfilePage.css'; // Import the CSS file for styling
+
 function ProfilePage() {
-  const [fullName, setFullName] = useState('John Doe');
-  const [profilePicture, setProfilePicture] = useState(avatars7);
- const [employeeID, setEmployeeID] = useState('EMP12345');
-  const [department, setDepartment] = useState('Engineering');
-  const [position, setPosition] = useState('Software Engineer');
-  const [contactInfo, setContactInfo] = useState('john.doe@example.com');
+  const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
+  const [studentID, setStudentID] = useState("");
+  const [college, setCollege] = useState("");
+  const [department, setDepartment] = useState("");
+  const [section, setSection] = useState("");
+  const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const handleEditFullName = (event) => {
-    setFullName(event.target.value);
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const handleEdit = (setter) => (event) => setter(event.target.value);
+
+  const handleSaveClick = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/updateprofile/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullname: fullName,
+          student_id: studentID,
+          department: department,
+          section: section,
+          college: college,
+          phonenumber: phoneNumber,
+          email: email,
+          gender: gender,
+          profile_picture: profilePicture,
+          password: password,
+        }),
+      });
+      if (response.ok) {
+        console.log('Profile updated successfully');
+        setIsEditMode(false);
+      } else {
+        console.error('Failed to update user profile:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+    }
   };
 
-  const handleEditEmployeeID = (event) => {
-    setEmployeeID(event.target.value);
-  };
-
-  const handleEditDepartment = (event) => {
-    setDepartment(event.target.value);
-  };
-
-  const handleEditPosition = (event) => {
-    setPosition(event.target.value);
-  };
-
-  const handleEditContactInfo = (event) => {
-    setContactInfo(event.target.value);
-  };
-
-  const handleEditClick = () => {
-    setIsEditMode(true);
-  };
-
-  const handleSaveClick = () => {
-    setIsEditMode(false);
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/profile/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        const profileData = await response.json();
+        setFullName(profileData.fullname);
+        setRole(profileData.role);
+        setStudentID(profileData.student_id || "");
+        setDepartment(profileData.department || ""); 
+        setSection(profileData.section || "");
+        setCollege(profileData.college || ""); 
+        setPhoneNumber(profileData.phonenumber || "");
+        setEmail(profileData.email || "");
+        setGender(profileData.gender || "");
+        if (profileData.profile_picture) {
+          setProfilePicture(profileData.profile_picture);
+        }
+      } else {
+        console.error("Failed to fetch user profile:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
   };
 
   return (
-    <div
-      style={{
-     
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        background: '#f1f1f1',
-       
-      }}
-    >
-      <div
-        style={{
-          border: '1px solid #ccc',
-          padding: '20px',
-         
-          borderRadius: '4px',
-          background: '#fff',
-          maxWidth: '400px',
-           
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-         
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: '20px',
-            width:'400px' ,
-            height: '200px' ,
-          }}
-        >
-          <img
-            src={profilePicture}
-            alt="Profile Picture"
-            style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '50%',
-              marginBottom: '10px',
-            }}
-          />
-          <h2 style={{ margin: 0 }}>{fullName}</h2>
-          <p style={{ color: '#888' }}>{position}</p>
+    <div className="profile-container">
+      <div className="profile-card">
+        <div className="profile-header">
+          <img src={profilePicture ? profilePicture : avatars7} alt="Profile" className="profile-picture" />
+          <h2>{fullName}</h2>
+          <p>{role}</p>
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ fontWeight: 'bold' }}>Employee ID:</label>
-          <div>{employeeID}</div>
+        <div className="profile-body">
+          {role === "student" && (
+            <>
+              <div className="profile-field">
+                <label>Student ID:</label>
+                {isEditMode ? (
+                  <input type="text" value={studentID} onChange={handleEdit(setStudentID)} />
+                ) : (
+                  <div>{studentID}</div>
+                )}
+              </div>
+              <div className="profile-field">
+                <label>Section:</label>
+                {isEditMode ? (
+                  <input type="text" value={section} onChange={handleEdit(setSection)} />
+                ) : (
+                  <div>{section}</div>
+                )}
+              </div>
+            </>
+          )}
+          <div className="profile-field">
+            <label>Gender:</label>
+            {isEditMode ? (
+              <select value={gender} onChange={handleEdit(setGender)}>
+                <option value="" disabled>Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            ) : (
+              <div>{gender}</div>
+            )}
+          </div>
+          <div className="profile-field">
+            <label>Contact Information:</label>
+            {isEditMode ? (
+              <input type="text" value={phoneNumber} onChange={handleEdit(setPhoneNumber)} />
+            ) : (
+              <div>{phoneNumber}</div>
+            )}
+          </div>
+          <div className="profile-field">
+            <label>Email:</label>
+            {isEditMode ? (
+              <input type="text" value={email} onChange={handleEdit(setEmail)} />
+            ) : (
+              <div>{email}</div>
+            )}
+          </div>
+          <div className="profile-field">
+            <label>College:</label>
+            {isEditMode ? (
+              <input type="text" value={college} onChange={handleEdit(setCollege)} />
+            ) : (
+              <div>{college}</div>
+            )}
+          </div>
+          <div className="profile-field">
+            <label>Department:</label>
+            {isEditMode ? (
+              <input type="text" value={department} onChange={handleEdit(setDepartment)} />
+            ) : (
+              <div>{department}</div>
+            )}
+          </div>
+          <div className="profile-field">
+            <label>Password:</label>
+            {isEditMode ? (
+              <input type="password" value={password} onChange={handleEdit(setPassword)} />
+            ) : (
+              <div>******</div>
+            )}
+          </div>
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ fontWeight: 'bold' }}>Department:</label>
-          <div>{department}</div>
+        <div className="profile-footer">
+          {isEditMode ? (
+            <button onClick={handleSaveClick} className="save-button">Save</button>
+          ) : (
+            <button onClick={() => setIsEditMode(true)} className="edit-button">Edit</button>
+          )}
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ fontWeight: 'bold' }}>Contact Information:</label>
-          <div>{contactInfo}</div>
-        </div>
-        {isEditMode ? (
-          <>
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ fontWeight: 'bold' }}>Full Name:</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={handleEditFullName}
-                style={{ width: '100%', padding: '8px' }}
-              />
-            </div>
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ fontWeight: 'bold' }}>Profile Picture:</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) =>
-                  setProfilePicture(event.target.files[0])
-                }
-                style={{ width: '100%', padding: '8px' }}
-              />
-            </div>
-          </>
-        ) : null}
-        {isEditMode ? (
-          <button
-            onClick={handleSaveClick}
-            style={{
-              width: '100%',
-              padding: '8px',
-              background: '#4caf50',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Save
-          </button>
-        ) : (
-          <button
-            onClick={handleEditClick}
-            style={{
-              width: '100%',
-              padding: '8px',
-              background: '#2196f3',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Edit
-          </button>
-        )}
       </div>
     </div>
   );

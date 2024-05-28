@@ -1,8 +1,9 @@
 /* eslint-disable */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 // chakra imports
 import { Box, Flex, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { isAuthenticated, getUserRole } from 'authService';
 
 export function SidebarLinks(props) {
   //   Chakra color mode
@@ -18,9 +19,26 @@ export function SidebarLinks(props) {
 
   const { routes } = props;
 
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const role = getUserRole(); // Assuming this function returns the user's role
+    setUserRole(role);
+  }, []);
+
   // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
     return location.pathname.includes(routeName);
+  };
+
+  // Role-based access control logic
+  const isRoleAllowed = (route) => {
+    if (!userRole) {
+      // If user role is not yet fetched, assume it's not allowed
+      return false;
+    }
+    // Check if the user's role is allowed for the given route
+    return route.allowedRoles.includes(userRole);
   };
 
   // this function creates the links from the secondary accordions (for example auth -> sign-in -> default)
@@ -28,7 +46,7 @@ export function SidebarLinks(props) {
     return routes.map((route, index) => {
       if (route.category) {
         return (
-          <>
+          <React.Fragment key={index}>
             <Text
               fontSize={"md"}
               color={activeColor}
@@ -39,17 +57,13 @@ export function SidebarLinks(props) {
                 xl: "16px",
               }}
               pt='18px'
-              pb='12px'
-              key={index}>
+              pb='12px'>
               {route.name}
             </Text>
             {createLinks(route.items)}
-          </>
+          </React.Fragment>
         );
-      } else if (
-        route.layout === "/admin" ||
-        route.layout === "/auth" 
-      ) {
+      } else if (isRoleAllowed(route)) {
         return (
           <NavLink key={index} to={route.layout + route.path}>
             {route.icon ? (
@@ -123,6 +137,8 @@ export function SidebarLinks(props) {
             )}
           </NavLink>
         );
+      } else {
+        return null; // Skip rendering this route if not allowed for the user's role
       }
     });
   };
