@@ -11,6 +11,7 @@ import routes from 'routes.js';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
+	console.log("teacher layout");
 	const { ...rest } = props;
 	// states and functions
 	const [ fixed ] = useState(false);
@@ -20,7 +21,7 @@ export default function Dashboard(props) {
 		return window.location.pathname !== '/teacher/full-screen-maps';
 	};
 	const getActiveRoute = (routes) => {
-		let activeRoute = 'Default Brand Text';
+		let activeRoute = 'teacher';
 		for (let i = 0; i < routes.length; i++) {
 			if (routes[i].collapse) {
 				let collapseActiveRoute = getActiveRoute(routes[i].items);

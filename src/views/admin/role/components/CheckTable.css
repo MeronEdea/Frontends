@@ -1,0 +1,28 @@
+.check-table {
+    padding: 20px;
+    margin-top: 40px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .check-table h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .role-list table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ccc;
+  }
+  
+  .role-list th, .role-list td {
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .role-list th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-align: left;
+  }
+  

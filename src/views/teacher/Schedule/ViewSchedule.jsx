@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom"; // Import useHistory hook for redirection
 import {
   Box,
@@ -8,38 +8,14 @@ import {
   Table,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import {  dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { Portal, useDisclosure } from "@chakra-ui/react";
-import routes from "../../../routes.js";
-import Navbar from "../../../components/navbar/NavbarAdmin.js";
 import { DeleteIcon } from "@chakra-ui/icons"; // Import the DeleteIcon component
-
-const sampleSchedule = [
-  {
-    time: "9:00 AM",
-    Monday: "Section C",
-    Tuesday: "Section A",
-    Wednesday: "Section C",
-    Thursday: "",
-    Friday: "Section D",
-  },
-  {
-    time: "10:00 AM",
-    Monday: "",
-    Tuesday: "Section D",
-    Wednesday: "",
-    Thursday: "Section B",
-    Friday: "Section C",
-  },
-  // Add more sample data as needed
-];
 
 const ViewSchedule = () => {
   const locales = {
@@ -54,13 +30,15 @@ const ViewSchedule = () => {
     locales,
   });
 
-  const [openSlot, setOpenSlot] = useState(false);
-  const [openTodoModal, setOpenTodoModal] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState(null);
-  const [eventInfoModal, setEventInfoModal] = useState(false);
-  const [events, setEvents] = useState([]);
-
+  const [sampleSchedule, setSampleSchedule] = useState([]);
   const history = useHistory(); // Initialize useHistory
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/display_schedule/')
+      .then(response => response.json())
+      .then(data => setSampleSchedule(data))
+      .catch(error => console.error('Error fetching schedule:', error));
+  }, []);
 
   // Generate random color with lighter opacity
   const getRandomColor = () => {
@@ -77,7 +55,6 @@ const ViewSchedule = () => {
     console.log("Add Event button clicked");
     history.push("/add-schedule"); // Assuming "/add-schedule" is the route path for the AddSchedule page
   };
-  
 
   // Calculate dates
   const today = new Date();

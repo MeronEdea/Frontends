@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Tbody,
@@ -19,9 +19,16 @@ import {
 import DateRangePicker from "react-daterange-picker";
 import "react-daterange-picker/dist/css/react-calendar.css";
 
-export default function CheckTable({ activityData }) {
+export default function CheckTable() {
+  const [activityData, setActivityData] = useState([]);
   const [dateRange, setDateRange] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    fetchActivityLogs();
+  }, [currentPage]); // Fetch logs whenever currentPage changes
 
   const handleDateRangeChange = (newDateRange) => {
     setDateRange(newDateRange);
@@ -31,6 +38,34 @@ export default function CheckTable({ activityData }) {
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const fetchActivityLogs = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/activity-logs/?page=${currentPage}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setActivityData(data.logs);
+        setTotalPages(data.total_pages);
+      } else {
+        console.error("Failed to fetch activity logs:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching activity logs:", error);
+    }
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -43,34 +78,7 @@ export default function CheckTable({ activityData }) {
       mx="auto"
       overflowX="auto"
     >
-      <Box mb="4" mt="20">
-        <Button onClick={toggleModal} bg="blue.100">
-          {dateRange
-            ? `${dateRange.start.format("YYYY-MM-DD")} to ${dateRange.end.format(
-                "YYYY-MM-DD"
-              )}`
-            : "Filter By Date"}
-        </Button>
-        <Modal isOpen={isModalOpen} onClose={toggleModal}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Select Date Range</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <DateRangePicker
-                value={dateRange}
-                onSelect={handleDateRangeChange}
-                singleDateRange={true}
-              />
-            </ModalBody>
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={toggleModal}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </Box>
+      {/* Your Date Range Picker and Modal code */}
       <Table variant="simple" color="gray.500" mb="24px">
         <Thead>
           <Tr>
@@ -101,21 +109,27 @@ export default function CheckTable({ activityData }) {
           </Tr>
         </Thead>
         <Tbody>
-          {activityData &&
-            activityData.map((activitylog, index) => (
-              <Tr key={index}>
-                <Td>{index + 1}</Td>
-                <Td>{activitylog.user}</Td>
-                <Td>{activitylog.action}</Td>
-                <Td>{activitylog.resource}</Td>
-                <Td>{activitylog.details}</Td>
-                <Td>{activitylog.ipaddress}</Td>
-                <Td>{activitylog.statuscode}</Td>
-                <Td>{activitylog.timestamp}</Td>
-              </Tr>
-            ))}
+          {activityData.map((activitylog, index) => (
+            <Tr key={index}>
+              <Td>{(currentPage - 1) * 10 + index + 1}</Td>
+              <Td>{activitylog.user}</Td>
+              <Td>{activitylog.action}</Td>
+              <Td>{activitylog.resource}</Td>
+              <Td>{activitylog.details}</Td>
+              <Td>{activitylog.ip_address}</Td>
+              <Td>{activitylog.status_code}</Td>
+              <Td>{activitylog.timestamp}</Td>
+            </Tr>
+          ))}
         </Tbody>
       </Table>
+      {/* Pagination */}
+      <Button onClick={handlePrevPage} disabled={currentPage === 1}>
+        Previous
+      </Button>
+      <Button ml="2" onClick={handleNextPage} disabled={currentPage === totalPages}>
+        Next
+      </Button>
     </Box>
   );
 }

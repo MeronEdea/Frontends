@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Tbody,
@@ -16,27 +16,42 @@ import {
   PopoverArrow,
   PopoverCloseButton,
   PopoverBody,
+  Button,
+  Flex
 } from "@chakra-ui/react";
 import { MdMoreVert } from "react-icons/md";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
 
-export default function CheckTable({ tableData }) {
+export default function CheckTable({ teacherId }) {
   const textColor = useColorModeValue("secondaryGray.900", "white");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
   const history = useHistory();
+  const [courses, setCourses] = useState([]);
 
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  useEffect(() => {
+    // Retrieve the access token from local storage
+    const accessToken = localStorage.getItem('accessToken');
+
+    // Fetch the list of courses assigned to the specific teacher
+    axios.get('http://localhost:8000/api/teacher-courses/', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+      .then(response => setCourses(response.data))
+      .catch(error => console.error('Error fetching courses:', error));
+  }, []);
 
   const handleSelectCourse = (index) => {
     console.log("Handle select course function called with index:", index);
-    const selectedCourse = tableData[index];
+    const selectedCourse = courses[index];
     // Use history to navigate to the view page
-    history.push(`/courses/${index}`);
+    history.push(`/courses/${selectedCourse.id}`);
     console.log("after history push");
   };
 
-  const handleCloseMenu = () => {
-    setSelectedCourse(null);
+  const handleAddNewCourse = () => {
+    history.push("/teacher-course-selection");
   };
 
   return (
@@ -49,23 +64,32 @@ export default function CheckTable({ tableData }) {
       mx="auto"
       overflowX="auto"
     >
+      <Flex justifyContent="space-between" mb="4">
+        <Text fontSize="2xl" fontWeight="bold" color={textColor}>
+          Course List
+        </Text>
+        <Button colorScheme="blue" onClick={handleAddNewCourse}>
+          Add New Course
+        </Button>
+      </Flex>
       <Table variant="simple" color="gray.500" mb="24px">
         <Thead>
           <Tr>
             <Th minW="50px"></Th>
             <Th minW="50px" bg="blue.200">No</Th>
-            <Th minW="150px" bg="blue.200">Course Code</Th>
-            <Th minW="200px" bg="blue.200">Course Name</Th>
+            <Th minW="100px" bg="blue.200">Course Code</Th>
+            <Th minW="100px" bg="blue.200">Course Name</Th>
             <Th minW="100px" bg="blue.200">Duration</Th>
             <Th minW="100px" bg="blue.200">Year</Th>
             <Th minW="200px" bg="blue.200">Pre-request</Th>
+            <Th minW="100px" bg="blue.200">Join Code</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {tableData.map((course, index) => (
+          {courses.map((course, index) => (
             <Tr key={index}>
               <Td>
-              <Popover maxW="xs" maxH="xs">
+                <Popover maxW="xs" maxH="xs">
                   <PopoverTrigger>
                     <IconButton
                       aria-label="More options"
@@ -84,11 +108,6 @@ export default function CheckTable({ tableData }) {
                       >
                         View
                       </Text>
-                      <Text
-                        cursor="pointer"
-                      >
-                        Schedule
-                      </Text>
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>
@@ -99,6 +118,7 @@ export default function CheckTable({ tableData }) {
               <Td>{course.duration}</Td>
               <Td>{course.year}</Td>
               <Td>{course.prerequest}</Td>
+              <Td>{course.joinCode}</Td>
             </Tr>
           ))}
         </Tbody>

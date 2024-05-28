@@ -1,38 +1,165 @@
-.management-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+/* AdminHR.css */
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
 }
 
-/* Styles for the cards */
-.card {
-  width: 700px;
-  padding: 30px;
-  margin: 20px;
+.admin-hr-page {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
   background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.card h2 {
-  margin-top: 0;
-  font-size: 24px;
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #007bff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.admin-hr-content {
+  margin-bottom: 20px;
+}
+
+.add-teacher-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #28a745;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-teacher-btn:hover {
+  background-color: #218838;
+}
+
+.teacher-management h3 {
+  margin-bottom: 20px;
   color: #333;
 }
 
-.card p {
-  margin-top: 20px;
-  font-size: 18px;
-  color: #666;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
-/* Styles for course management card */
-.course-management {
-  background-color: #ffbb33;
+table th, table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
 }
 
-/* Styles for teacher management card */
-.teacher-management {
-  background-color: #33ccff;
+table th {
+  background-color: #f2f2f2;
+}
+
+.edit-btn, .delete-btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  margin-right: 4px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.add-teacher-popup {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.add-teacher-popup input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.add-teacher-popup button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-teacher-popup button[type="submit"] {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.add-teacher-popup button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+.add-teacher-popup button[type="button"] {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.add-teacher-popup button[type="button"]:hover {
+  background-color: #c82333;
 }

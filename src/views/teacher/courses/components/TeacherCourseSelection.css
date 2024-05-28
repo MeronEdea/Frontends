@@ -1,0 +1,54 @@
+/* src/views/teacher/TeacherCourseSelection.css */
+
+.course-selection-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #f7fafc; /* Light blue background */
+}
+
+.course-selection-heading {
+  text-align: center;
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+}
+
+.course-checkbox {
+  width: 100%;
+  padding: 1rem 1.5rem; /* Increased padding */
+  border: 1px solid #cbd5e0; /* Light gray border */
+  border-radius: 8px;
+  background-color: #edf2f7; /* Light gray background */
+  color: #4a5568;
+  transition: background-color 0.3s ease;
+}
+
+.course-checkbox:hover {
+  background-color: #e2e8f0; /* Darker gray background on hover */
+}
+
+.course-checkbox:last-child {
+  border-bottom: none;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  margin-top: 2rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #ffffff;
+  background-color: #4a90e2; /* Blue button */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #2a69ac; /* Darker blue on hover */
+}

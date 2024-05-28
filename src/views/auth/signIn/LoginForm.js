@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import loginImage from "./../../../assets/img/auth/class.jpg";
 import { useHistory } from "react-router-dom";
-import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
+import { FaEnvelope, FaLock } from "react-icons/fa";
 import movingImage from "../../../assets/img/auth/class.jpg";
 
 const LoginForm = () => {
   const [loginMethod, setLoginMethod] = useState("");
-  const [loginId, setLoginId] = useState("");
-  const [loginIdError, setLoginIdError] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginEmailError, setLoginEmailError] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginPasswordError, setLoginPasswordError] = useState("");
   const [showCamera, setShowCamera] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
+  const [loginStatus, setLoginStatus] = useState(""); // New state for login status
   const videoRef = useRef(null);
   const history = useHistory();
 
@@ -57,8 +57,8 @@ const LoginForm = () => {
     }
   };
 
-  const handleLoginIdChange = (e) => {
-    setLoginId(e.target.value);
+  const handleLoginEmailChange = (e) => {
+    setLoginEmail(e.target.value);
   };
 
   const handleLoginPasswordChange = (e) => {
@@ -67,54 +67,82 @@ const LoginForm = () => {
 
   const validateLoginForm = () => {
     let isValid = true;
-
-    if (loginMethod === "email") {
-      if (!/^(ETS|Ets)\d{4}\/\d{2}$/.test(loginId.trim())) {
-        setLoginIdError("The format should be ETS0451/12 or Ets0451/12");
-        isValid = false;
-      } else {
-        setLoginIdError("");
-      }
+    const trimmedEmail = loginEmail.trim();
+  
+    if (!/^\S+@\S+\.\S+$/.test(trimmedEmail) && !/^(ETS|Ets)\d{4}\/\d{2}$/.test(trimmedEmail)) {
+      setLoginEmailError("Please enter a valid email address or student ID.");
+      isValid = false;
+    } else {
+      setLoginEmailError("");
     }
-
-    if (loginMethod === "email") {
-      if (
-        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/.test(
-          loginPassword.trim()
-        )
-      ) {
-        setLoginPasswordError(
-          "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character."
-        );
-        isValid = false;
-      } else {
-        setLoginPasswordError("");
-      }
-    }
-
+  
     return isValid;
   };
-
-  const handleLoginSubmit = (e) => {
+  
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!validateLoginForm()) {
       return;
     }
-
-    if (
-      loginMethod === "email" &&
-      loginId.trim() !== "" &&
-      loginPassword.trim() !== ""
-    ) {
-      setLoginMethod("");
-      setLoginId("");
-      setLoginPassword("");
-
-      history.push(`/admin`);
+  
+    setLoginStatus("logging_in"); // Set login status to "logging_in" when login starts
+  
+    let requestData = {};
+    const trimmedEmail = loginEmail.trim();
+  
+    if (/^(ETS|Ets)\d{4}\/\d{2}$/.test(trimmedEmail)) {
+      requestData = {
+        student_id: trimmedEmail,
+        password: loginPassword.trim(),
+      };
+    } else {
+      requestData = {
+        email: trimmedEmail,
+        password: loginPassword.trim(),
+      };
+    }
+  
+    console.log("Login request data:", requestData);
+  
+    try {
+      const response = await fetch("http://localhost:8000/api/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+  
+      const responseData = await response.json();
+      console.log("My Login response data:", responseData);
+  
+      if (response.ok) {
+        localStorage.setItem("accessToken", responseData.access_token);
+        localStorage.setItem("role", JSON.stringify(responseData.role));
+        const userRole = responseData.role;
+        console.log("login form: ");
+        console.log(userRole);
+        setLoginStatus(""); // Clear login status on success
+        if (userRole === "admin") {
+          history.push(`/admin`);
+        } else if (userRole === "teacher") {
+          history.push(`/teacher`);
+        } else if (userRole === "student") {
+          history.push(`/student`);
+        } else {
+          console.error("Unknown user role:", userRole);
+        }
+      } else {
+        setLoginStatus("invalid"); // Set login status to "invalid" on failure
+        console.error("Login failed:", responseData.error);
+      }
+    } catch (error) {
+      setLoginStatus("invalid"); // Set login status to "invalid" on error
+      console.error("Login failed:", error);
     }
   };
-
+  
   const startCamera = () => {
     navigator.mediaDevices
       .getUserMedia({ video: true })
@@ -146,15 +174,17 @@ const LoginForm = () => {
         type: "image/jpeg",
       });
 
-      // You can set this file to state or use it as needed
     } catch (error) {
       console.error("Error capturing picture:", error);
     }
   };
 
   return (
-<div className="registration-container flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat" style={{ backgroundImage: `url(${movingImage})` }}>
-    <div className="flex flex-col justify-between h-full py-8">
+    <div
+      className="registration-container flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat"
+      style={{ backgroundImage: `url(${movingImage})` }}
+    >
+      <div className="flex flex-col justify-between h-full py-8">
         <div
           className="rounded-xl bg-gray-600 bg-opacity-50 px-16 w-96 py-10 shadow-lg backdrop-blur-md max-sm:px-8"
           style={{ width: "500px" }}
@@ -169,13 +199,13 @@ const LoginForm = () => {
             <div className="mb-10 flex justify-between">
               <button
                 className={`text-lg ${
-                  loginMethod === "email"
+                  loginMethod === "id"
                     ? "text-blue-500 font-bold px-3"
                     : "text-white px-3"
                 }`}
-                onClick={() => handleLoginMethodChange("email")}
+                onClick={() => handleLoginMethodChange("id")}
               >
-                Login with email
+                Login with Email or ID
               </button>
               <button
                 className={`text-lg ${
@@ -188,24 +218,27 @@ const LoginForm = () => {
                 Login with face scan
               </button>
             </div>
-            {loginMethod === "email" && (
+            {loginMethod === "id" && (
               <form onSubmit={handleLoginSubmit}>
                 <div className="mb-4 text-lg">
                   <div className="relative">
                     <input
                       type="text"
-                      value={loginId}
-                      onChange={handleLoginIdChange}
+                      value={loginEmail}
+                      onChange={handleLoginEmailChange}
+                      onFocus={() => setLoginEmailError("")}
                       placeholder=" "
                       className="registration-input text-white pl-4 mb-4 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
                     />
-                    <label className="absolute top-0 left-0 -mt-2 ml-2 text-gray-400">
+                    <label className={`absolute top-0 left-0 mt-2 ml-2 text-gray-400 ${
+                    loginEmail ? "hidden" : ""
+                  }`}>
                       <FaEnvelope className="inline-block mr-2 mt-1" /> Enter
-                      your email
+                      your Email or ID
                     </label>
                   </div>
-                  {loginIdError && (
-                    <p className="text-red-500 text-sm">{loginIdError}</p>
+                  {loginEmailError && (
+                    <p className="text-red-500 text-sm">{loginEmailError}</p>
                   )}
                 </div>
                 <div className="mb-4 text-lg">
@@ -214,10 +247,13 @@ const LoginForm = () => {
                       type="password"
                       value={loginPassword}
                       onChange={handleLoginPasswordChange}
+                      onFocus={() => setLoginPasswordError("")}
                       placeholder=" "
                       className="registration-input text-white pl-4 mb-4 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
                     />
-                    <label className="absolute top-0 left-0 -mt-2 ml-2 text-gray-400">
+                    <label className={`absolute top-0 left-0 mt-2 ml-2 text-gray-400 ${
+                    loginPassword ? "hidden" : ""
+                  }`}>
                       <FaLock className="inline-block mr-2 mt-1" /> Enter your
                       password
                     </label>
@@ -228,6 +264,12 @@ const LoginForm = () => {
                     </p>
                   )}
                 </div>
+                {loginStatus === "logging_in" && (
+                  <p className="text-blue-500 text-sm mb-4">Logging in...</p>
+                )}
+                {loginStatus === "invalid" && (
+                  <p className="text-red-500 text-sm mb-4">Invalid login. Please try again.</p>
+                )}
                 <div className="mb-4 text-lg flex flex-col ">
                   <span
                     className="text-blue-500 cursor-pointer mb-4 ml-56"
